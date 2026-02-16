@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react"; // ✅ added useEffect
+import { useNavigate } from "react-router-dom"; // ✅ added useNavigate
 import axios from "axios";
 
 export default function Signup() {
@@ -10,6 +11,17 @@ export default function Signup() {
     role: "PUBLIC_USER",
   });
   const [files, setFiles] = useState([]);
+
+  const navigate = useNavigate(); // ✅ added
+
+  // ✅ optional: redirect if already logged in
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    const role = localStorage.getItem("role");
+    if (token) {
+      navigate(role === "ADMIN" ? "/admin" : "/dashboard");
+    }
+  }, [navigate]);
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -37,8 +49,12 @@ export default function Signup() {
         data
       );
       alert(res.data.message);
+
+      // ✅ added redirect after successful signup
+      navigate(form.role === "ADMIN" ? "/admin" : "/dashboard");
+
     } catch (err) {
-      alert(err.response.data.message);
+      alert(err.response?.data?.message || "Signup failed");
     }
   };
 

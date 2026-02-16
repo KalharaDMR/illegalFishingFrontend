@@ -4,6 +4,7 @@ import Login from "./pages/Login";
 import AdminDashboard from "./pages/AdminDashboard";
 import ProtectedRoute from "./components/ProtectedRoute";
 import AdminUsers from "./pages/AdminUsers";
+import PublicDashboard from "./pages/PublicDashboard"; // ✅ add this import
 
 function App() {
   return (
@@ -12,6 +13,9 @@ function App() {
         <Route path="/" element={<Login />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
+
+        {/* Public user dashboard route */}
+        <Route path="/dashboard" element={<PublicDashboard />} /> {/* ✅ added */}
 
         <Route
           path="/admin"

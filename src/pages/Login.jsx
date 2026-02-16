@@ -1,11 +1,20 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react"; // ✅ added useEffect
+import { useNavigate } from "react-router-dom"; // ✅ already imported
 import axios from "axios";
 
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const navigate = useNavigate();
+  const navigate = useNavigate(); // ✅ already present
+
+  // ✅ added: redirect if already logged in
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    const role = localStorage.getItem("role");
+    if (token) {
+      navigate(role === "ADMIN" ? "/admin" : "/dashboard");
+    }
+  }, [navigate]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -19,7 +28,7 @@ export default function Login() {
       localStorage.setItem("token", res.data.token);
       localStorage.setItem("role", res.data.user.role);
 
-      navigate(res.data.user.role === "ADMIN" ? "/admin" : "/dashboard");
+      navigate(res.data.user.role === "ADMIN" ? "/admin" : "/dashboard"); // ✅ already present
     } catch (err) {
       alert(err.response?.data?.message || "Login failed");
     }
