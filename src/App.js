@@ -1,22 +1,35 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+
 import Signup from "./pages/Signup";
 import Login from "./pages/Login";
 import AdminDashboard from "./pages/AdminDashboard";
-import ProtectedRoute from "./components/ProtectedRoute";
 import AdminUsers from "./pages/AdminUsers";
-import PublicDashboard from "./pages/PublicDashboard"; // ✅ add this import
+import PublicDashboard from "./pages/PublicDashboard";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<Login />} />
+
+        {/* Default route */}
+        <Route path="/" element={<Navigate to="/login" />} />
+
+        {/* Auth pages */}
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
 
-        {/* Public user dashboard route */}
-        <Route path="/dashboard" element={<PublicDashboard />} /> {/* ✅ added */}
+        {/* PUBLIC USER DASHBOARD */}
+        <Route
+          path="/dashboard"
+          element={
+            <ProtectedRoute role="PUBLIC_USER">
+              <PublicDashboard />
+            </ProtectedRoute>
+          }
+        />
 
+        {/* ADMIN DASHBOARD */}
         <Route
           path="/admin"
           element={
@@ -25,6 +38,7 @@ function App() {
             </ProtectedRoute>
           }
         />
+
         <Route
           path="/admin/users"
           element={
@@ -33,6 +47,7 @@ function App() {
             </ProtectedRoute>
           }
         />
+
       </Routes>
     </BrowserRouter>
   );

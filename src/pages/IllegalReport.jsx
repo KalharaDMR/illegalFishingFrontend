@@ -1,8 +1,8 @@
 import React, { useState } from "react";
-import axios from "../api/axios";
+import axios from "axios";
 
-const IllegalReport = () => {
-  const [formData, setFormData] = useState({
+export default function IllegalReport() {
+  const [form, setForm] = useState({
     reportDate: "",
     reportTime: "",
     location: "",
@@ -10,123 +10,123 @@ const IllegalReport = () => {
     longitude: "",
     description: "",
   });
-  const [evidence, setEvidence] = useState([]);
+
+  const [files, setFiles] = useState([]);
   const [message, setMessage] = useState("");
 
   const handleChange = (e) =>
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  const handleFileChange = (e) => setEvidence([...e.target.files]);
+    setForm({ ...form, [e.target.name]: e.target.value });
+
+  const handleFileChange = (e) => setFiles([...e.target.files]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     const data = new FormData();
-    Object.keys(formData).forEach((key) => data.append(key, formData[key]));
-    evidence.forEach((file) => data.append("evidence", file));
+
+    Object.keys(form).forEach((key) => data.append(key, form[key]));
+    files.forEach((file) => data.append("evidence", file));
 
     try {
-      const token = localStorage.getItem("token"); // Public User token
+      const token = localStorage.getItem("token");
 
-      // ✅ Changed URL from "/" to correct backend endpoint
-      const res = await axios.post(
-        "http://localhost:5000/api/reports/",
-        data,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      const res = await axios.post("http://localhost:5000/api/reports", data, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
       setMessage(res.data.message);
-      setFormData({
-        reportDate: "",
-        reportTime: "",
-        location: "",
-        latitude: "",
-        longitude: "",
-        description: "",
-      });
-      setEvidence([]);
     } catch (err) {
-      setMessage(err.response?.data?.message || "Error submitting report");
+      setMessage("Submission failed");
     }
   };
 
   return (
-    <div>
-      <h3 className="text-2xl font-semibold mb-3 text-cyan-900">
-        Report Illegal Fishing
-      </h3>
-      {message && <p className="mb-3 text-green-700 font-medium">{message}</p>}
-      <form onSubmit={handleSubmit} className="flex flex-col gap-2">
-        <input
-          type="date"
-          name="reportDate"
-          value={formData.reportDate}
-          onChange={handleChange}
-          required
-          className="p-2 rounded border border-cyan-600"
-        />
-        <input
-          type="time"
-          name="reportTime"
-          value={formData.reportTime}
-          onChange={handleChange}
-          required
-          className="p-2 rounded border border-cyan-600"
-        />
-        <input
-          type="text"
-          name="location"
-          placeholder="Location"
-          value={formData.location}
-          onChange={handleChange}
-          required
-          className="p-2 rounded border border-cyan-600"
-        />
-        <input
-          type="text"
-          name="latitude"
-          placeholder="Latitude"
-          value={formData.latitude}
-          onChange={handleChange}
-          required
-          className="p-2 rounded border border-cyan-600"
-        />
-        <input
-          type="text"
-          name="longitude"
-          placeholder="Longitude"
-          value={formData.longitude}
-          onChange={handleChange}
-          required
-          className="p-2 rounded border border-cyan-600"
-        />
+    <div style={styles.page}>
+      <form onSubmit={handleSubmit} style={styles.card}>
+
+        <h2 style={styles.title}>🚨 Report Illegal Fishing</h2>
+
+        {message && <p>{message}</p>}
+
+        <div style={styles.row}>
+          <input type="date" name="reportDate" onChange={handleChange} style={styles.input} required />
+          <input type="time" name="reportTime" onChange={handleChange} style={styles.input} required />
+        </div>
+
+        <input placeholder="Location" name="location" onChange={handleChange} style={styles.input} />
+
+        <div style={styles.row}>
+          <input placeholder="Latitude" name="latitude" onChange={handleChange} style={styles.input} />
+          <input placeholder="Longitude" name="longitude" onChange={handleChange} style={styles.input} />
+        </div>
+
         <textarea
+          placeholder="Describe what you witnessed..."
           name="description"
-          placeholder="Description"
-          value={formData.description}
           onChange={handleChange}
-          required
-          className="p-2 rounded border border-cyan-600"
+          style={{ ...styles.input, height: "90px" }}
         />
-        <input
-          type="file"
-          multiple
-          onChange={handleFileChange}
-          accept="image/*,video/*"
-          className="p-2"
-        />
-        <button
-          type="submit"
-          className="bg-cyan-700 text-white p-2 rounded hover:bg-cyan-900 mt-2 font-bold"
-        >
+
+        <input type="file" multiple onChange={handleFileChange} />
+
+        <button type="submit" style={styles.button}>
           Submit Report
         </button>
+
       </form>
     </div>
   );
-};
+}
 
-export default IllegalReport;
+/* INLINE CSS OBJECT */
+
+const styles = {
+  page: {
+    minHeight: "100vh",
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    background: "#f2f2f2",
+  },
+
+  card: {
+    background: "white",
+    padding: "25px",
+    borderRadius: "10px",
+    width: "380px",
+    display: "flex",
+    flexDirection: "column",
+    gap: "10px",
+    boxShadow: "0 0 15px rgba(0,0,0,.15)",
+  },
+
+  title: {
+    textAlign: "center",
+    color: "red",
+  },
+
+  row: {
+    display: "flex",
+    gap: "8px",
+  },
+
+  input: {
+    padding: "8px",
+    border: "1px solid #ccc",
+    borderRadius: "5px",
+    width: "100%",
+  },
+
+  button: {
+    background: "red",
+    color: "white",
+    padding: "10px",
+    border: "none",
+    borderRadius: "6px",
+    cursor: "pointer",
+    fontWeight: "bold",
+    marginTop: "10px",
+  },
+};
