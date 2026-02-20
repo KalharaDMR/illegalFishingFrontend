@@ -1,15 +1,16 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import RestrictedAreas from "../components/RestrictedAreas";
 import EndangeredSpecies from "../components/EndangeredSpecies";
-import IllegalReport from "./IllegalReport";
 
 const PublicDashboard = () => {
   const [restrictedAreas, setRestrictedAreas] = useState([]);
   const [speciesList, setSpeciesList] = useState([]);
   const username = localStorage.getItem("username") || "Public User";
+  const navigate = useNavigate();
 
   useEffect(() => {
-    // MOCK DATA
+    // Sample data for restricted areas
     setRestrictedAreas([
       {
         name: "Hikkaduwa Marine Sanctuary",
@@ -27,6 +28,7 @@ const PublicDashboard = () => {
       },
     ]);
 
+    // Sample data for endangered species
     setSpeciesList([
       {
         name: "Green Sea Turtle",
@@ -44,46 +46,65 @@ const PublicDashboard = () => {
   return (
     <div className="bg-cyan-100 min-h-screen p-6">
 
-      {/* LOGOUT BUTTON */}
-      <button
-        onClick={() => {
-          localStorage.clear();
-          window.location.href = "/login";
-        }}
-        className="bg-red-600 text-white px-4 py-2 rounded float-right"
-      >
-        Logout
-      </button>
+      {/* ----------------- Header ----------------- */}
+      <header className="flex justify-between items-center bg-cyan-900 p-4 rounded-lg shadow-md mb-8">
+        {/* Left: Logo */}
+        <div>
+          <h1 className="text-3xl font-bold text-white">OceanWatch</h1>
+          <p className="text-cyan-200 mt-1">SDG 14: Life Below Water</p>
+        </div>
 
-      <header className="text-center mb-8">
-        <h1 className="text-4xl font-bold text-cyan-900">OceanWatch</h1>
-        <h2 className="text-xl text-cyan-700 mt-2">
-          SDG 14: Life Below Water
-        </h2>
-        <p className="mt-2 text-cyan-800">
-          Welcome, {username}! Help us protect marine life by reporting illegal
-          fishing activities and learning about endangered species.
-        </p>
+        {/* Right: User Info & Logout */}
+        <div className="flex items-center gap-4">
+          {/* Profile Badge */}
+          <div className="w-10 h-10 bg-cyan-700 text-white rounded-full flex items-center justify-center font-bold shadow">
+            {username[0].toUpperCase()}
+          </div>
+          {/* Username */}
+          <span className="text-white font-semibold">{username}</span>
+          {/* Logout Button */}
+          <button
+            onClick={() => {
+              localStorage.clear();
+              window.location.href = "/login";
+            }}
+            className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg shadow"
+          >
+            Logout
+          </button>
+        </div>
       </header>
 
+      {/* ----------------- Cards ----------------- */}
       <div className="flex flex-wrap justify-center gap-6">
 
-        <div className="bg-cyan-200 p-4 rounded-lg shadow-lg w-full md:w-96">
+        {/* Endangered Species Card */}
+        <div className="bg-cyan-200 p-6 rounded-lg shadow-lg w-full md:w-96 hover:scale-105 transition-transform duration-300">
           <h3 className="text-2xl font-semibold mb-3 text-cyan-900">
             Endangered Species
           </h3>
           <EndangeredSpecies species={speciesList} />
         </div>
 
-        <div className="bg-cyan-200 p-4 rounded-lg shadow-lg w-full md:w-96">
+        {/* Restricted Areas Card */}
+        <div className="bg-cyan-200 p-6 rounded-lg shadow-lg w-full md:w-96 hover:scale-105 transition-transform duration-300">
           <h3 className="text-2xl font-semibold mb-3 text-cyan-900">
             Restricted Areas
           </h3>
           <RestrictedAreas areas={restrictedAreas} />
         </div>
 
-        <div className="bg-cyan-200 p-4 rounded-lg shadow-lg w-full md:w-96">
-          <IllegalReport />
+        {/* Report Illegal Fishing Card */}
+        <div className="bg-red-100 p-6 rounded-lg shadow-lg w-full md:w-96 text-center hover:scale-105 transition-transform duration-300">
+          <h3 className="text-2xl font-semibold mb-4 text-red-700">
+            Report Illegal Fishing
+          </h3>
+          <button
+            onClick={() => navigate("/report")}
+            className="bg-red-600 text-white px-6 py-3 rounded-lg text-lg hover:bg-red-700 shadow"
+          >
+            🚨 Submit Report
+          </button>
         </div>
 
       </div>

@@ -1,7 +1,10 @@
 import React, { useState } from "react";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 export default function IllegalReport() {
+  const navigate = useNavigate();
+
   const [form, setForm] = useState({
     reportDate: "",
     reportTime: "",
@@ -17,13 +20,10 @@ export default function IllegalReport() {
   const handleChange = (e) =>
     setForm({ ...form, [e.target.name]: e.target.value });
 
-  const handleFileChange = (e) => setFiles([...e.target.files]);
-
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     const data = new FormData();
-
     Object.keys(form).forEach((key) => data.append(key, form[key]));
     files.forEach((file) => data.append("evidence", file));
 
@@ -31,13 +31,16 @@ export default function IllegalReport() {
       const token = localStorage.getItem("token");
 
       const res = await axios.post("http://localhost:5000/api/reports", data, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { Authorization: `Bearer ${token}` },
       });
 
       setMessage(res.data.message);
-    } catch (err) {
+
+      setTimeout(() => {
+        navigate("/dashboard"); // ✅ Redirect back
+      }, 1500);
+
+    } catch {
       setMessage("Submission failed");
     }
   };
@@ -46,15 +49,12 @@ export default function IllegalReport() {
     <div style={styles.page}>
       <form onSubmit={handleSubmit} style={styles.card}>
 
-        <h2 style={styles.title}>🚨 Report Illegal Fishing</h2>
+        <h2 style={styles.title}>🚨 Report Illegal Fishing Activity</h2>
 
-        {message && <p>{message}</p>}
+        {message && <p style={{ textAlign: "center" }}>{message}</p>}
 
-        <div style={styles.row}>
-          <input type="date" name="reportDate" onChange={handleChange} style={styles.input} required />
-          <input type="time" name="reportTime" onChange={handleChange} style={styles.input} required />
-        </div>
-
+        <input type="date" name="reportDate" onChange={handleChange} style={styles.input} required />
+        <input type="time" name="reportTime" onChange={handleChange} style={styles.input} required />
         <input placeholder="Location" name="location" onChange={handleChange} style={styles.input} />
 
         <div style={styles.row}>
@@ -63,16 +63,24 @@ export default function IllegalReport() {
         </div>
 
         <textarea
-          placeholder="Describe what you witnessed..."
+          placeholder="Describe the incident..."
           name="description"
           onChange={handleChange}
           style={{ ...styles.input, height: "90px" }}
         />
 
-        <input type="file" multiple onChange={handleFileChange} />
+        <input type="file" multiple onChange={(e) => setFiles([...e.target.files])} />
 
         <button type="submit" style={styles.button}>
           Submit Report
+        </button>
+
+        <button
+          type="button"
+          onClick={() => navigate("/dashboard")}
+          style={styles.cancel}
+        >
+          Cancel
         </button>
 
       </form>
@@ -80,47 +88,45 @@ export default function IllegalReport() {
   );
 }
 
-/* INLINE CSS OBJECT */
-
 const styles = {
   page: {
     minHeight: "100vh",
     display: "flex",
     justifyContent: "center",
     alignItems: "center",
-    background: "#f2f2f2",
+    background: "linear-gradient(135deg,#1d3557,#457b9d)",
   },
 
   card: {
     background: "white",
-    padding: "25px",
-    borderRadius: "10px",
-    width: "380px",
+    padding: "35px",
+    borderRadius: "14px",
+    width: "420px",
     display: "flex",
     flexDirection: "column",
-    gap: "10px",
-    boxShadow: "0 0 15px rgba(0,0,0,.15)",
+    gap: "12px",
+    boxShadow: "0 15px 35px rgba(0,0,0,.3)",
   },
 
   title: {
     textAlign: "center",
-    color: "red",
+    color: "#e63946",
   },
 
   row: {
     display: "flex",
-    gap: "8px",
+    gap: "10px",
   },
 
   input: {
-    padding: "8px",
+    padding: "9px",
     border: "1px solid #ccc",
-    borderRadius: "5px",
+    borderRadius: "6px",
     width: "100%",
   },
 
   button: {
-    background: "red",
+    background: "#e63946",
     color: "white",
     padding: "10px",
     border: "none",
@@ -128,5 +134,14 @@ const styles = {
     cursor: "pointer",
     fontWeight: "bold",
     marginTop: "10px",
+  },
+
+  cancel: {
+    background: "#555",
+    color: "white",
+    padding: "8px",
+    border: "none",
+    borderRadius: "6px",
+    cursor: "pointer",
   },
 };

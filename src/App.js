@@ -5,6 +5,7 @@ import Login from "./pages/Login";
 import AdminDashboard from "./pages/AdminDashboard";
 import AdminUsers from "./pages/AdminUsers";
 import PublicDashboard from "./pages/PublicDashboard";
+import IllegalReport from "./pages/IllegalReport"; // ✅ import the report page
 import ProtectedRoute from "./components/ProtectedRoute";
 
 function App() {
@@ -25,6 +26,16 @@ function App() {
           element={
             <ProtectedRoute role="PUBLIC_USER">
               <PublicDashboard />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* 🚨 Add this route for the report form */}
+        <Route
+          path="/report"
+          element={
+            <ProtectedRoute role="PUBLIC_USER">
+              <IllegalReport />
             </ProtectedRoute>
           }
         />
