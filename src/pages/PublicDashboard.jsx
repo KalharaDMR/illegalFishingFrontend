@@ -6,11 +6,10 @@ import EndangeredSpecies from "../components/EndangeredSpecies";
 const PublicDashboard = () => {
   const [restrictedAreas, setRestrictedAreas] = useState([]);
   const [speciesList, setSpeciesList] = useState([]);
-  const username = localStorage.getItem("username") || "Public User";
+  const username = localStorage.getItem("username") || "User";
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Sample data for restricted areas
     setRestrictedAreas([
       {
         name: "Hikkaduwa Marine Sanctuary",
@@ -28,7 +27,6 @@ const PublicDashboard = () => {
       },
     ]);
 
-    // Sample data for endangered species
     setSpeciesList([
       {
         name: "Green Sea Turtle",
@@ -46,15 +44,13 @@ const PublicDashboard = () => {
   return (
     <div className="bg-cyan-100 min-h-screen p-6">
 
-      {/* ----------------- Header ----------------- */}
+      {/* Header */}
       <header className="flex justify-between items-center bg-cyan-900 p-4 rounded-lg shadow-md mb-8">
-        {/* Left: Logo */}
         <div>
           <h1 className="text-3xl font-bold text-white">OceanWatch</h1>
           <p className="text-cyan-200 mt-1">SDG 14: Life Below Water</p>
         </div>
 
-        {/* Right: User Info & Logout */}
         <div className="flex items-center gap-4">
           {/* Profile Badge */}
           <div className="w-10 h-10 bg-cyan-700 text-white rounded-full flex items-center justify-center font-bold shadow">
@@ -75,10 +71,9 @@ const PublicDashboard = () => {
         </div>
       </header>
 
-      {/* ----------------- Cards ----------------- */}
+      {/* Cards */}
       <div className="flex flex-wrap justify-center gap-6">
-
-        {/* Endangered Species Card */}
+        {/* Endangered Species */}
         <div className="bg-cyan-200 p-6 rounded-lg shadow-lg w-full md:w-96 hover:scale-105 transition-transform duration-300">
           <h3 className="text-2xl font-semibold mb-3 text-cyan-900">
             Endangered Species
@@ -86,7 +81,7 @@ const PublicDashboard = () => {
           <EndangeredSpecies species={speciesList} />
         </div>
 
-        {/* Restricted Areas Card */}
+        {/* Restricted Areas */}
         <div className="bg-cyan-200 p-6 rounded-lg shadow-lg w-full md:w-96 hover:scale-105 transition-transform duration-300">
           <h3 className="text-2xl font-semibold mb-3 text-cyan-900">
             Restricted Areas
@@ -94,7 +89,7 @@ const PublicDashboard = () => {
           <RestrictedAreas areas={restrictedAreas} />
         </div>
 
-        {/* Report Illegal Fishing Card */}
+        {/* Report Illegal Fishing */}
         <div className="bg-red-100 p-6 rounded-lg shadow-lg w-full md:w-96 text-center hover:scale-105 transition-transform duration-300">
           <h3 className="text-2xl font-semibold mb-4 text-red-700">
             Report Illegal Fishing
@@ -106,7 +101,6 @@ const PublicDashboard = () => {
             🚨 Submit Report
           </button>
         </div>
-
       </div>
     </div>
   );
