@@ -52,13 +52,11 @@ const PublicDashboard = () => {
         </div>
 
         <div className="flex items-center gap-4">
-          {/* Profile Badge */}
           <div className="w-10 h-10 bg-cyan-700 text-white rounded-full flex items-center justify-center font-bold shadow">
             {username[0].toUpperCase()}
           </div>
-          {/* Username */}
           <span className="text-white font-semibold">{username}</span>
-          {/* Logout Button */}
+
           <button
             onClick={() => {
               localStorage.clear();
@@ -73,6 +71,7 @@ const PublicDashboard = () => {
 
       {/* Cards */}
       <div className="flex flex-wrap justify-center gap-6">
+
         {/* Endangered Species */}
         <div className="bg-cyan-200 p-6 rounded-lg shadow-lg w-full md:w-96 hover:scale-105 transition-transform duration-300">
           <h3 className="text-2xl font-semibold mb-3 text-cyan-900">
@@ -101,6 +100,20 @@ const PublicDashboard = () => {
             🚨 Submit Report
           </button>
         </div>
+
+        {/* ✅ NEW - My Reports */}
+        <div className="bg-green-100 p-6 rounded-lg shadow-lg w-full md:w-96 text-center hover:scale-105 transition-transform duration-300">
+          <h3 className="text-2xl font-semibold mb-4 text-green-700">
+            My Submitted Reports
+          </h3>
+          <button
+            onClick={() => navigate("/my-reports")}
+            className="bg-green-600 text-white px-6 py-3 rounded-lg text-lg hover:bg-green-700 shadow"
+          >
+            📂 View My Reports
+          </button>
+        </div>
+
       </div>
     </div>
   );
