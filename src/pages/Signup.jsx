@@ -1,5 +1,6 @@
 import { useState } from "react";
 import axios from "axios";
+import { getDistricts } from "../api/districts"; // Import the districts API
 
 export default function Signup() {
   const [form, setForm] = useState({
@@ -8,6 +9,7 @@ export default function Signup() {
     phone: "",
     password: "",
     role: "PUBLIC_USER",
+    district: "", // Add district field
   });
   const [files, setFiles] = useState([]);
 
@@ -21,9 +23,21 @@ export default function Signup() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
+
+    // Validate district for AUTHORIZED_PERSON
+    if (form.role === "AUTHORIZED_PERSON" && !form.district) {
+      alert("Please select a district");
+      setLoading(false);
+      return;
+    }
 
     const data = new FormData();
-    Object.keys(form).forEach((key) => data.append(key, form[key]));
+    Object.keys(form).forEach((key) => {
+      if (form[key]) { // Only append if value exists
+        data.append(key, form[key]);
+      }
+    });
 
     if (form.role !== "PUBLIC_USER") {
       for (let file of files) {
@@ -34,7 +48,12 @@ export default function Signup() {
     try {
       const res = await axios.post(
         "http://localhost:5000/api/auth/signup",
-        data
+        data,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
       );
       alert(res.data.message);
     } catch (err) {
@@ -43,57 +62,155 @@ export default function Signup() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
+    <div className="min-h-screen flex items-center justify-center bg-gray-100 py-12 px-4 sm:px-6 lg:px-8">
       <form
         onSubmit={handleSubmit}
-        className="bg-white p-6 rounded shadow w-96"
+        className="bg-white p-8 rounded shadow w-full max-w-md space-y-4"
       >
-        <h2 className="text-xl font-bold mb-4">Sign Up</h2>
+        <h2 className="text-2xl font-bold mb-6 text-center">Sign Up</h2>
 
-        <input
-          name="name"
-          placeholder="Name"
-          onChange={handleChange}
-          className="input"
-        />
-        <input
-          name="email"
-          placeholder="Email"
-          onChange={handleChange}
-          className="input"
-        />
-        <input
-          name="phone"
-          placeholder="Phone"
-          onChange={handleChange}
-          className="input"
-        />
-        <input
-          type="password"
-          name="password"
-          placeholder="Password"
-          onChange={handleChange}
-          className="input"
-        />
-
-        <select name="role" onChange={handleChange} className="input">
-          <option value="PUBLIC_USER">Public User</option>
-          <option value="ZOOLOGIST">Zoologist</option>
-          <option value="AUTHORIZED_PERSON">Authorized Person</option>
-        </select>
-
-        {form.role !== "PUBLIC_USER" && (
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Name
+          </label>
           <input
-            type="file"
-            multiple
-            onChange={handleFileChange}
-            className="mt-3"
+            name="name"
+            placeholder="Enter your full name"
+            value={form.name}
+            onChange={handleChange}
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            required
           />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Email
+          </label>
+          <input
+            name="email"
+            type="email"
+            placeholder="Enter your email"
+            value={form.email}
+            onChange={handleChange}
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            required
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Phone
+          </label>
+          <input
+            name="phone"
+            placeholder="Enter your phone number"
+            value={form.phone}
+            onChange={handleChange}
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            required
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Password
+          </label>
+          <input
+            type="password"
+            name="password"
+            placeholder="Enter your password"
+            value={form.password}
+            onChange={handleChange}
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            required
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Role
+          </label>
+          <select 
+            name="role" 
+            value={form.role}
+            onChange={handleChange} 
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            <option value="PUBLIC_USER">Public User</option>
+            <option value="ZOOLOGIST">Zoologist</option>
+            <option value="AUTHORIZED_PERSON">Authorized Person</option>
+          </select>
+        </div>
+
+        {/* District dropdown for AUTHORIZED_PERSON */}
+        {form.role === "AUTHORIZED_PERSON" && (
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              District <span className="text-red-500">*</span>
+            </label>
+            <select
+              name="district"
+              value={form.district}
+              onChange={handleChange}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              required
+            >
+              <option value="">Select a district</option>
+              {districts.map((district) => (
+                <option key={district} value={district}>
+                  {district}
+                </option>
+              ))}
+            </select>
+            <p className="text-xs text-gray-500 mt-1">
+              Please select your district of operation
+            </p>
+          </div>
         )}
 
-        <button className="bg-blue-600 text-white w-full py-2 mt-4 rounded">
-          Register
+        {/* Evidence upload for non-public users */}
+        {form.role !== "PUBLIC_USER" && (
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Evidence Documents <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="file"
+              multiple
+              onChange={handleFileChange}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              accept=".pdf,.jpg,.jpeg,.png"
+              required
+            />
+            <p className="text-xs text-gray-500 mt-1">
+              Upload relevant documents (PDF, JPG, PNG)
+            </p>
+          </div>
+        )}
+
+        <button
+          type="submit"
+          disabled={loading}
+          className={`w-full py-2 px-4 rounded-md text-white font-medium ${
+            loading 
+              ? "bg-gray-400 cursor-not-allowed" 
+              : "bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+          }`}
+        >
+          {loading ? "Registering..." : "Register"}
         </button>
+
+        <p className="text-sm text-center mt-4">
+          Already have an account?{" "}
+          <button
+            type="button"
+            onClick={() => window.location.href = "/login"}
+            className="text-blue-600 hover:underline focus:outline-none"
+          >
+            Login here
+          </button>
+        </p>
       </form>
     </div>
   );

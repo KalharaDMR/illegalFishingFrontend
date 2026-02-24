@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
@@ -6,6 +6,15 @@ export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
+
+  // Redirect if already logged in
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    const role = localStorage.getItem("role");
+    if (token) {
+      navigate(role === "ADMIN" ? "/admin" : "/dashboard");
+    }
+  }, [navigate]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -16,9 +25,12 @@ export default function Login() {
         { email, password }
       );
 
+      // ✅ Save token, role, and username
       localStorage.setItem("token", res.data.token);
       localStorage.setItem("role", res.data.user.role);
+      localStorage.setItem("username", res.data.user.name); // ✅ save actual name
 
+      // Redirect
       navigate(res.data.user.role === "ADMIN" ? "/admin" : "/dashboard");
     } catch (err) {
       alert(err.response?.data?.message || "Login failed");
@@ -35,14 +47,14 @@ export default function Login() {
 
         <input
           placeholder="Email"
-          className="input"
+          className="input mb-2 w-full p-2 border rounded"
           onChange={(e) => setEmail(e.target.value)}
           required
         />
         <input
           type="password"
           placeholder="Password"
-          className="input"
+          className="input mb-2 w-full p-2 border rounded"
           onChange={(e) => setPassword(e.target.value)}
           required
         />
@@ -51,7 +63,6 @@ export default function Login() {
           Login
         </button>
 
-        {/* SIGNUP LINK */}
         <p className="text-sm text-center mt-4">
           Don’t have an account?{" "}
           <button
