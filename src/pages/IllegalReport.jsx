@@ -1,6 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import L from "leaflet";
+import "leaflet/dist/leaflet.css";
 
 const sriLankaDistricts = [
   "Ampara", "Anuradhapura", "Badulla", "Batticaloa", "Colombo",
@@ -12,6 +14,8 @@ const sriLankaDistricts = [
 
 export default function IllegalReport() {
   const navigate = useNavigate();
+  const mapRef = useRef(null);
+  const markerRef = useRef(null);
 
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
@@ -30,6 +34,35 @@ export default function IllegalReport() {
 
   const handleChange = (e) =>
     setForm({ ...form, [e.target.name]: e.target.value });
+
+  // ✅ Initialize Leaflet Map
+  useEffect(() => {
+    if (mapRef.current) return; // Prevent multiple maps
+
+    const map = L.map("map").setView([7.8731, 80.7718], 7); // Sri Lanka center
+
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      attribution: "&copy; OpenStreetMap contributors",
+    }).addTo(map);
+
+    map.on("click", function (e) {
+      const { lat, lng } = e.latlng;
+
+      setForm((prev) => ({
+        ...prev,
+        latitude: lat.toFixed(6),
+        longitude: lng.toFixed(6),
+      }));
+
+      if (markerRef.current) {
+        map.removeLayer(markerRef.current);
+      }
+
+      markerRef.current = L.marker([lat, lng]).addTo(map);
+    });
+
+    mapRef.current = map;
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -131,16 +164,28 @@ export default function IllegalReport() {
           <input
             placeholder="Latitude"
             name="latitude"
-            onChange={handleChange}
+            value={form.latitude}
+            readOnly
             style={styles.input}
           />
           <input
             placeholder="Longitude"
             name="longitude"
-            onChange={handleChange}
+            value={form.longitude}
+            readOnly
             style={styles.input}
           />
         </div>
+
+        {/* 🗺 Leaflet Map */}
+        <div
+          id="map"
+          style={{
+            width: "100%",
+            height: "300px",
+            borderRadius: "8px",
+          }}
+        ></div>
 
         <textarea
           placeholder="Describe the incident..."
