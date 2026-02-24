@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import axios from "axios";
 import { getDistricts } from "../api/districts"; // Import the districts API
 
@@ -12,6 +12,17 @@ export default function Signup() {
     district: "", // Add district field
   });
   const [files, setFiles] = useState([]);
+  const [districts, setDistricts] = useState([]);
+  const [loading, setLoading] = useState(false);
+
+  // Fetch districts when component mounts
+  useEffect(() => {
+    const fetchDistricts = async () => {
+      const districtList = await getDistricts();
+      setDistricts(districtList);
+    };
+    fetchDistricts();
+  }, []);
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -56,8 +67,12 @@ export default function Signup() {
         }
       );
       alert(res.data.message);
+      // Redirect to login after successful signup
+      window.location.href = "/login";
     } catch (err) {
-      alert(err.response.data.message);
+      alert(err.response?.data?.message || "Signup failed");
+    } finally {
+      setLoading(false);
     }
   };
 

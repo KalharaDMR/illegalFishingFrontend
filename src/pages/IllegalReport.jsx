@@ -2,10 +2,22 @@ import React, { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
+const sriLankaDistricts = [
+  "Ampara", "Anuradhapura", "Badulla", "Batticaloa", "Colombo",
+  "Galle", "Gampaha", "Hambantota", "Jaffna", "Kalutara",
+  "Kandy", "Kegalle", "Kilinochchi", "Kurunegala", "Mannar",
+  "Matale", "Matara", "Monaragala", "Mullaitivu", "Nuwara Eliya",
+  "Polonnaruwa", "Puttalam", "Ratnapura", "Trincomalee", "Vavuniya"
+];
+
 export default function IllegalReport() {
   const navigate = useNavigate();
 
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState("");
+
   const [form, setForm] = useState({
+    district: "",
     reportDate: "",
     reportTime: "",
     location: "",
@@ -15,51 +27,119 @@ export default function IllegalReport() {
   });
 
   const [files, setFiles] = useState([]);
-  const [message, setMessage] = useState("");
 
   const handleChange = (e) =>
     setForm({ ...form, [e.target.name]: e.target.value });
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
+
+    if (!form.district) {
+      setMessage("District is required");
+      setLoading(false);
+      return;
+    }
 
     const data = new FormData();
-    Object.keys(form).forEach((key) => data.append(key, form[key]));
-    files.forEach((file) => data.append("evidence", file));
+
+    Object.keys(form).forEach((key) => {
+      data.append(key, form[key]);
+    });
+
+    files.forEach((file) => {
+      data.append("evidence", file);
+    });
 
     try {
       const token = localStorage.getItem("token");
 
-      const res = await axios.post("http://localhost:5000/api/reports", data, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const res = await axios.post(
+        "http://localhost:5000/api/reports",
+        data,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
 
       setMessage(res.data.message);
 
       setTimeout(() => {
-        navigate("/dashboard"); // ✅ Redirect back
+        navigate("/dashboard");
       }, 1500);
 
-    } catch {
-      setMessage("Submission failed");
+    } catch (error) {
+      setMessage(
+        error.response?.data?.message || "Submission failed"
+      );
     }
+
+    setLoading(false);
   };
 
   return (
     <div style={styles.page}>
       <form onSubmit={handleSubmit} style={styles.card}>
-
-        <h2 style={styles.title}>🚨 Report Illegal Fishing Activity</h2>
+        <h2 style={styles.title}>
+          🚨 Report Illegal Fishing Activity
+        </h2>
 
         {message && <p style={{ textAlign: "center" }}>{message}</p>}
 
-        <input type="date" name="reportDate" onChange={handleChange} style={styles.input} required />
-        <input type="time" name="reportTime" onChange={handleChange} style={styles.input} required />
-        <input placeholder="Location" name="location" onChange={handleChange} style={styles.input} />
+        <select
+          name="district"
+          value={form.district}
+          onChange={handleChange}
+          style={styles.input}
+          required
+        >
+          <option value="">Select District</option>
+          {sriLankaDistricts.map((d) => (
+            <option key={d} value={d}>
+              {d}
+            </option>
+          ))}
+        </select>
+
+        <input
+          type="date"
+          name="reportDate"
+          onChange={handleChange}
+          style={styles.input}
+          required
+        />
+
+        <input
+          type="time"
+          name="reportTime"
+          onChange={handleChange}
+          style={styles.input}
+          required
+        />
+
+        <input
+          placeholder="Location"
+          name="location"
+          onChange={handleChange}
+          style={styles.input}
+        />
 
         <div style={styles.row}>
-          <input placeholder="Latitude" name="latitude" onChange={handleChange} style={styles.input} />
-          <input placeholder="Longitude" name="longitude" onChange={handleChange} style={styles.input} />
+          <input
+            placeholder="Latitude"
+            name="latitude"
+            onChange={handleChange}
+            style={styles.input}
+          />
+          <input
+            placeholder="Longitude"
+            name="longitude"
+            onChange={handleChange}
+            style={styles.input}
+          />
         </div>
 
         <textarea
@@ -67,22 +147,22 @@ export default function IllegalReport() {
           name="description"
           onChange={handleChange}
           style={{ ...styles.input, height: "90px" }}
+          required
         />
 
-        <input type="file" multiple onChange={(e) => setFiles([...e.target.files])} />
-
-        <button type="submit" style={styles.button}>
-          Submit Report
-        </button>
+        <input
+          type="file"
+          multiple
+          onChange={(e) => setFiles([...e.target.files])}
+        />
 
         <button
-          type="button"
-          onClick={() => navigate("/dashboard")}
-          style={styles.cancel}
+          type="submit"
+          style={styles.button}
+          disabled={loading}
         >
-          Cancel
+          {loading ? "Submitting..." : "Submit Report"}
         </button>
-
       </form>
     </div>
   );
@@ -94,54 +174,37 @@ const styles = {
     display: "flex",
     justifyContent: "center",
     alignItems: "center",
-    background: "linear-gradient(135deg,#1d3557,#457b9d)",
+    backgroundColor: "#f3f4f6",
   },
-
   card: {
-    background: "white",
-    padding: "35px",
-    borderRadius: "14px",
-    width: "420px",
+    backgroundColor: "white",
+    padding: "30px",
+    borderRadius: "8px",
+    width: "100%",
+    maxWidth: "500px",
     display: "flex",
     flexDirection: "column",
     gap: "12px",
-    boxShadow: "0 15px 35px rgba(0,0,0,.3)",
   },
-
   title: {
     textAlign: "center",
-    color: "#e63946",
+    marginBottom: "10px",
   },
-
+  input: {
+    padding: "10px",
+    borderRadius: "5px",
+    border: "1px solid #ccc",
+  },
   row: {
     display: "flex",
     gap: "10px",
   },
-
-  input: {
-    padding: "9px",
-    border: "1px solid #ccc",
-    borderRadius: "6px",
-    width: "100%",
-  },
-
   button: {
-    background: "#e63946",
-    color: "white",
     padding: "10px",
-    border: "none",
-    borderRadius: "6px",
-    cursor: "pointer",
-    fontWeight: "bold",
-    marginTop: "10px",
-  },
-
-  cancel: {
-    background: "#555",
+    backgroundColor: "#2563eb",
     color: "white",
-    padding: "8px",
     border: "none",
-    borderRadius: "6px",
+    borderRadius: "5px",
     cursor: "pointer",
   },
 };
