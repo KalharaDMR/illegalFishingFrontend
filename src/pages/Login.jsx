@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
@@ -22,6 +22,15 @@ export default function Login() {
   const [focusedField, setFocusedField] = useState(null);
   const navigate = useNavigate();
 
+  // Redirect if already logged in
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    const role = localStorage.getItem("role");
+    if (token) {
+      navigate(role === "ADMIN" ? "/admin" : "/dashboard");
+    }
+  }, [navigate]);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -31,8 +40,11 @@ export default function Login() {
         { email, password }
       );
 
+      // ✅ Save token, role, and username
       localStorage.setItem("token", res.data.token);
       localStorage.setItem("role", res.data.user.role);
+      localStorage.setItem("username", res.data.user.name); // ✅ save actual name
+
 
       switch (res.data.user.role) {
         case "ADMIN":       navigate("/admin"); break;
@@ -41,6 +53,8 @@ export default function Login() {
         case "AUTHORIZED_PERSON": navigate("/authorized"); break;
         default:            navigate("/login");
       }
+      // Redirect
+      navigate(res.data.user.role === "ADMIN" ? "/admin" : "/dashboard");
     } catch (err) {
       alert(err.response?.data?.message || "Login failed");
     }
@@ -114,6 +128,7 @@ export default function Login() {
             />
           </div>
 
+
           <div>
             <label style={{ display: "block", fontSize: "13px", fontWeight: "500", color: "#374263", marginBottom: "6px" }}>
               Password
@@ -132,6 +147,20 @@ export default function Login() {
               required
             />
           </div>
+
+        <input
+          placeholder="Email"
+          className="input mb-2 w-full p-2 border rounded"
+          onChange={(e) => setEmail(e.target.value)}
+          required
+        />
+        <input
+          type="password"
+          placeholder="Password"
+          className="input mb-2 w-full p-2 border rounded"
+          onChange={(e) => setPassword(e.target.value)}
+          required
+        />
 
           <button
             type="submit"
@@ -159,8 +188,11 @@ export default function Login() {
           </button>
         </form>
 
+
         <p style={{ textAlign: "center", fontSize: "13px", color: "#6b7a99", marginTop: "24px", marginBottom: 0 }}>
           Don't have an account?{" "}
+        <p className="text-sm text-center mt-4">
+          Don’t have an account?{" "}
           <button
             type="button"
             onClick={() => navigate("/signup")}
