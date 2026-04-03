@@ -37,9 +37,8 @@ export default function IllegalReport() {
       setMessage(res.data.message);
 
       setTimeout(() => {
-        navigate("/dashboard"); // ✅ Redirect back
+        navigate("/dashboard"); //  Redirect back
       }, 1500);
-
     } catch {
       setMessage("Submission failed");
     }
@@ -48,18 +47,44 @@ export default function IllegalReport() {
   return (
     <div style={styles.page}>
       <form onSubmit={handleSubmit} style={styles.card}>
-
         <h2 style={styles.title}>🚨 Report Illegal Fishing Activity</h2>
 
         {message && <p style={{ textAlign: "center" }}>{message}</p>}
 
-        <input type="date" name="reportDate" onChange={handleChange} style={styles.input} required />
-        <input type="time" name="reportTime" onChange={handleChange} style={styles.input} required />
-        <input placeholder="Location" name="location" onChange={handleChange} style={styles.input} />
+        <input
+          type="date"
+          name="reportDate"
+          onChange={handleChange}
+          style={styles.input}
+          required
+        />
+        <input
+          type="time"
+          name="reportTime"
+          onChange={handleChange}
+          style={styles.input}
+          required
+        />
+        <input
+          placeholder="Location"
+          name="location"
+          onChange={handleChange}
+          style={styles.input}
+        />
 
         <div style={styles.row}>
-          <input placeholder="Latitude" name="latitude" onChange={handleChange} style={styles.input} />
-          <input placeholder="Longitude" name="longitude" onChange={handleChange} style={styles.input} />
+          <input
+            placeholder="Latitude"
+            name="latitude"
+            onChange={handleChange}
+            style={styles.input}
+          />
+          <input
+            placeholder="Longitude"
+            name="longitude"
+            onChange={handleChange}
+            style={styles.input}
+          />
         </div>
 
         <textarea
@@ -69,7 +94,11 @@ export default function IllegalReport() {
           style={{ ...styles.input, height: "90px" }}
         />
 
-        <input type="file" multiple onChange={(e) => setFiles([...e.target.files])} />
+        <input
+          type="file"
+          multiple
+          onChange={(e) => setFiles([...e.target.files])}
+        />
 
         <button type="submit" style={styles.button}>
           Submit Report
@@ -82,7 +111,6 @@ export default function IllegalReport() {
         >
           Cancel
         </button>
-
       </form>
     </div>
   );
