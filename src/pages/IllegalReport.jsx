@@ -4,14 +4,6 @@ import { useNavigate } from "react-router-dom";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 
-const sriLankaDistricts = [
-  "Ampara", "Anuradhapura", "Badulla", "Batticaloa", "Colombo",
-  "Galle", "Gampaha", "Hambantota", "Jaffna", "Kalutara",
-  "Kandy", "Kegalle", "Kilinochchi", "Kurunegala", "Mannar",
-  "Matale", "Matara", "Monaragala", "Mullaitivu", "Nuwara Eliya",
-  "Polonnaruwa", "Puttalam", "Ratnapura", "Trincomalee", "Vavuniya"
-];
-
 export default function IllegalReport() {
   const navigate = useNavigate();
   const mapRef = useRef(null);
@@ -35,11 +27,10 @@ export default function IllegalReport() {
   const handleChange = (e) =>
     setForm({ ...form, [e.target.name]: e.target.value });
 
-  // ✅ Initialize Leaflet Map
   useEffect(() => {
-    if (mapRef.current) return; // Prevent multiple maps
+    if (mapRef.current) return;
 
-    const map = L.map("map").setView([7.8731, 80.7718], 7); // Sri Lanka center
+    const map = L.map("map").setView([7.8731, 80.7718], 7);
 
     L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
       attribution: "&copy; OpenStreetMap contributors",
@@ -68,12 +59,6 @@ export default function IllegalReport() {
     e.preventDefault();
     setLoading(true);
 
-    if (!form.district) {
-      setMessage("District is required");
-      setLoading(false);
-      return;
-    }
-
     const data = new FormData();
 
     Object.keys(form).forEach((key) => {
@@ -101,13 +86,11 @@ export default function IllegalReport() {
       setMessage(res.data.message);
 
       setTimeout(() => {
-        navigate("/dashboard");
+        navigate("/dashboard"); // from main
       }, 1500);
 
-    } catch (error) {
-      setMessage(
-        error.response?.data?.message || "Submission failed"
-      );
+    } catch {
+      setMessage("Submission failed"); // from main
     }
 
     setLoading(false);
@@ -116,26 +99,9 @@ export default function IllegalReport() {
   return (
     <div style={styles.page}>
       <form onSubmit={handleSubmit} style={styles.card}>
-        <h2 style={styles.title}>
-          🚨 Report Illegal Fishing Activity
-        </h2>
+        <h2 style={styles.title}>🚨 Report Illegal Fishing Activity</h2>
 
         {message && <p style={{ textAlign: "center" }}>{message}</p>}
-
-        <select
-          name="district"
-          value={form.district}
-          onChange={handleChange}
-          style={styles.input}
-          required
-        >
-          <option value="">Select District</option>
-          {sriLankaDistricts.map((d) => (
-            <option key={d} value={d}>
-              {d}
-            </option>
-          ))}
-        </select>
 
         <input
           type="date"
@@ -164,20 +130,17 @@ export default function IllegalReport() {
           <input
             placeholder="Latitude"
             name="latitude"
-            value={form.latitude}
-            readOnly
+            onChange={handleChange}
             style={styles.input}
           />
           <input
             placeholder="Longitude"
             name="longitude"
-            value={form.longitude}
-            readOnly
+            onChange={handleChange}
             style={styles.input}
           />
         </div>
 
-        {/* 🗺 Leaflet Map */}
         <div
           id="map"
           style={{
@@ -201,11 +164,7 @@ export default function IllegalReport() {
           onChange={(e) => setFiles([...e.target.files])}
         />
 
-        <button
-          type="submit"
-          style={styles.button}
-          disabled={loading}
-        >
+        <button type="submit" style={styles.button} disabled={loading}>
           {loading ? "Submitting..." : "Submit Report"}
         </button>
       </form>
