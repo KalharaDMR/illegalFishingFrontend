@@ -9,21 +9,19 @@ import ZoologistDashboard from "./pages/ZoologistDashboard";
 import AuthorizedDashboard from "./pages/AuthorizedDashboard";
 import AuthorizedProfile from "./pages/AuthorizedUserProfile";
 import IllegalReport from "./pages/IllegalReport";
-import MyReports from "./pages/MyReports"; // ✅ ADDED
+import MyReports from "./pages/MyReports"; //  ADDED
 import ProtectedRoute from "./components/ProtectedRoute";
 
 function App() {
   return (
     <BrowserRouter>
       <Routes>
-
         {/* Default route */}
         <Route path="/" element={<Navigate to="/login" />} />
 
         {/* Auth pages */}
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
-
 
         {/* Admin Routes */}
 
@@ -47,7 +45,7 @@ function App() {
           }
         />
 
-        {/* ✅ MY REPORTS PAGE */}
+        {/*  MY REPORTS PAGE */}
         <Route
           path="/my-reports"
           element={
@@ -75,7 +73,6 @@ function App() {
             </ProtectedRoute>
           }
         />
-
 
         {/* Public User Routes */}
         <Route
@@ -116,7 +113,6 @@ function App() {
             </ProtectedRoute>
           }
         />
-
       </Routes>
     </BrowserRouter>
   );
