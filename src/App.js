@@ -9,7 +9,9 @@ import ZoologistDashboard from "./pages/ZoologistDashboard";
 import AuthorizedDashboard from "./pages/AuthorizedDashboard";
 import AuthorizedProfile from "./pages/AuthorizedUserProfile";
 import IllegalReport from "./pages/IllegalReport";
-import MyReports from "./pages/MyReports"; // ✅ ADDED
+import MyReports from "./pages/MyReports";
+import Notifications from "./pages/Notifications";           // NEW
+import PublicUserProfile from "./pages/PublicUserProfile";   // NEW
 import ProtectedRoute from "./components/ProtectedRoute";
 
 function App() {
@@ -24,12 +26,19 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
 
-
-        {/* Admin Routes */}
-
         {/* PUBLIC USER DASHBOARD */}
         <Route
           path="/dashboard"
+          element={
+            <ProtectedRoute role="PUBLIC_USER">
+              <PublicDashboard />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Alias */}
+        <Route
+          path="/public"
           element={
             <ProtectedRoute role="PUBLIC_USER">
               <PublicDashboard />
@@ -47,12 +56,52 @@ function App() {
           }
         />
 
-        {/* ✅ MY REPORTS PAGE */}
+        {/* Alias for old path */}
+        <Route
+          path="/public/report"
+          element={
+            <ProtectedRoute role="PUBLIC_USER">
+              <IllegalReport />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* My Reports */}
         <Route
           path="/my-reports"
           element={
             <ProtectedRoute role="PUBLIC_USER">
               <MyReports />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Alias */}
+        <Route
+          path="/public/my-reports"
+          element={
+            <ProtectedRoute role="PUBLIC_USER">
+              <MyReports />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Notifications — NEW */}
+        <Route
+          path="/notifications"
+          element={
+            <ProtectedRoute role="PUBLIC_USER">
+              <Notifications />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Public User Profile — NEW */}
+        <Route
+          path="/public/profile"
+          element={
+            <ProtectedRoute role="PUBLIC_USER">
+              <PublicUserProfile />
             </ProtectedRoute>
           }
         />
@@ -75,18 +124,6 @@ function App() {
             </ProtectedRoute>
           }
         />
-
-
-        {/* Public User Routes */}
-        <Route
-          path="/public"
-          element={
-            <ProtectedRoute role="PUBLIC_USER">
-              <PublicDashboard />
-            </ProtectedRoute>
-          }
-        />
-        {/* Add more public routes like /public/report, etc. */}
 
         {/* Zoologist Routes */}
         <Route

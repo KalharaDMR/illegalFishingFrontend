@@ -1,8 +1,30 @@
 import { Link, useNavigate, useLocation } from "react-router-dom";
+import { useEffect, useState } from "react";
+import api from "../api/axios";
 
 export default function Sidebar({ role }) {
   const navigate = useNavigate();
   const location = useLocation();
+  const [notifCount, setNotifCount] = useState(0);
+
+  useEffect(() => {
+    if (role === "PUBLIC_USER") {
+      fetchNotifCount();
+    }
+  }, [role]);
+
+  const fetchNotifCount = async () => {
+    try {
+      const res = await api.get("/reports/my");
+      const reports = res.data || [];
+      const count = reports.filter(
+        (r) => r.status === "INVESTIGATING" || r.status === "RESOLVED"
+      ).length;
+      setNotifCount(count);
+    } catch {
+      setNotifCount(0);
+    }
+  };
 
   const handleLogout = () => {
     localStorage.clear();
@@ -23,6 +45,7 @@ export default function Sidebar({ role }) {
           { name: "Dashboard", path: "/public", icon: "⬡" },
           { name: "Report Incident", path: "/public/report", icon: "◎" },
           { name: "My Reports", path: "/public/my-reports", icon: "◉" },
+          { name: "Notifications", path: "/notifications", icon: "◆", badge: true },
           { name: "Profile", path: "/public/profile", icon: "◈" },
         ];
       case "ZOOLOGIST":
@@ -112,6 +135,7 @@ export default function Sidebar({ role }) {
                 background: isActive ? "rgba(34,211,176,0.1)" : "transparent",
                 borderLeft: isActive ? "2px solid #22d3b0" : "2px solid transparent",
                 transition: "all 0.15s ease",
+                position: "relative",
               }}
               onMouseEnter={e => {
                 if (!isActive) {
@@ -128,6 +152,22 @@ export default function Sidebar({ role }) {
             >
               <span style={{ fontSize: "11px", opacity: 0.7 }}>{item.icon}</span>
               {item.name}
+              {/* Notification badge — only on Notifications item */}
+              {item.badge && notifCount > 0 && (
+                <span style={{
+                  marginLeft: "auto",
+                  background: "#f59e0b",
+                  color: "#fff",
+                  fontSize: "10px",
+                  fontWeight: "700",
+                  borderRadius: "99px",
+                  padding: "1px 7px",
+                  minWidth: "18px",
+                  textAlign: "center",
+                }}>
+                  {notifCount}
+                </span>
+              )}
             </Link>
           );
         })}
