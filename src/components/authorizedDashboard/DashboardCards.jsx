@@ -48,19 +48,55 @@ export function StatCard({ label, value, sub, icon, iconColor }) {
   );
 }
 
+// ── Helper: convert backend-stored file.path to browser URL ──
+function resolveImageUrl(filePath) {
+  if (!filePath || typeof filePath !== "string") return "";
+
+  const normalized = filePath.replace(/\\/g, "/").trim();
+
+  if (normalized.startsWith("http://") || normalized.startsWith("https://")) {
+    return normalized;
+  }
+
+  if (normalized.startsWith("src/uploads/")) {
+    return `${API_BASE}/${normalized.replace(/^src\//, "")}`;
+  }
+
+  if (normalized.startsWith("/src/uploads/")) {
+    return `${API_BASE}/${normalized.replace(/^\/src\//, "")}`;
+  }
+
+  if (normalized.startsWith("uploads/")) {
+    return `${API_BASE}/${normalized}`;
+  }
+
+  if (normalized.startsWith("/uploads/")) {
+    return `${API_BASE}${normalized}`;
+  }
+
+  return `${API_BASE}/uploads/${normalized.split("/").pop()}`;
+}
+
 // ── Image Viewer Modal ───────────────────────────────────────
 function ZoneImagesModal({ zoneName, imageUrls, onClose }) {
   const [activeIndex, setActiveIndex] = useState(0);
+  const [failedImages, setFailedImages] = useState({});
 
-  const hasImages = imageUrls.length > 0;
-  const activeImage = hasImages ? imageUrls[activeIndex] : null;
+  const validImages = imageUrls.filter(Boolean);
+  const hasImages = validImages.length > 0;
+  const activeImage = hasImages ? validImages[activeIndex] : null;
+  const activeFailed = activeImage ? failedImages[activeImage] : false;
 
   const goPrev = () => {
-    setActiveIndex((prev) => (prev === 0 ? imageUrls.length - 1 : prev - 1));
+    setActiveIndex((prev) => (prev === 0 ? validImages.length - 1 : prev - 1));
   };
 
   const goNext = () => {
-    setActiveIndex((prev) => (prev === imageUrls.length - 1 ? 0 : prev + 1));
+    setActiveIndex((prev) => (prev === validImages.length - 1 ? 0 : prev + 1));
+  };
+
+  const markFailed = (url) => {
+    setFailedImages((prev) => ({ ...prev, [url]: true }));
   };
 
   return (
@@ -118,7 +154,7 @@ function ZoneImagesModal({ zoneName, imageUrls, onClose }) {
               }}
             >
               {hasImages
-                ? `Showing ${activeIndex + 1} of ${imageUrls.length}`
+                ? `Showing ${activeIndex + 1} of ${validImages.length}`
                 : "No uploaded images available"}
             </p>
           </div>
@@ -152,22 +188,43 @@ function ZoneImagesModal({ zoneName, imageUrls, onClose }) {
                   overflow: "hidden",
                   background: "#f8fafc",
                   marginBottom: "16px",
+                  minHeight: "220px",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
                 }}
               >
-                <img
-                  src={activeImage}
-                  alt={`${zoneName} ${activeIndex + 1}`}
-                  style={{
-                    width: "100%",
-                    maxHeight: "500px",
-                    objectFit: "contain",
-                    display: "block",
-                    background: "#f8fafc",
-                  }}
-                />
+                {activeFailed ? (
+                  <div
+                    style={{
+                      padding: "30px 20px",
+                      textAlign: "center",
+                      color: "#8a96b0",
+                      fontSize: "13px",
+                    }}
+                  >
+                    Failed to load image.
+                    <div style={{ marginTop: "8px", fontSize: "12px" }}>
+                      {activeImage}
+                    </div>
+                  </div>
+                ) : (
+                  <img
+                    src={activeImage}
+                    alt={`${zoneName} ${activeIndex + 1}`}
+                    onError={() => markFailed(activeImage)}
+                    style={{
+                      width: "100%",
+                      maxHeight: "500px",
+                      objectFit: "contain",
+                      display: "block",
+                      background: "#f8fafc",
+                    }}
+                  />
+                )}
               </div>
 
-              {imageUrls.length > 1 && (
+              {validImages.length > 1 && (
                 <div
                   style={{
                     display: "flex",
@@ -219,9 +276,9 @@ function ZoneImagesModal({ zoneName, imageUrls, onClose }) {
                   flexWrap: "wrap",
                 }}
               >
-                {imageUrls.map((url, index) => (
+                {validImages.map((url, index) => (
                   <button
-                    key={url}
+                    key={`${url}-${index}`}
                     onClick={() => setActiveIndex(index)}
                     style={{
                       border:
@@ -238,6 +295,9 @@ function ZoneImagesModal({ zoneName, imageUrls, onClose }) {
                     <img
                       src={url}
                       alt={`${zoneName} thumb ${index + 1}`}
+                      onError={(e) => {
+                        e.currentTarget.style.display = "none";
+                      }}
                       style={{
                         width: "88px",
                         height: "66px",
@@ -267,7 +327,14 @@ function ZoneImagesModal({ zoneName, imageUrls, onClose }) {
   );
 }
 
-export function ZoneCard({ zone, onEdit, onDelete }) {
+// ── Zone Card ────────────────────────────────────────────────
+export function ZoneCard({
+  zone,
+  onEdit,
+  onDelete,
+  onToggleStatus,
+  toggleLoading,
+}) {
   const [showImages, setShowImages] = useState(false);
 
   const lat = zone.location?.lat;
@@ -281,34 +348,9 @@ export function ZoneCard({ zone, onEdit, onDelete }) {
   const imageUrls = useMemo(() => {
     if (!zone.evidenceFiles?.length) return [];
 
-    return zone.evidenceFiles.filter(Boolean).map((filePath) => {
-      const normalized = String(filePath).replace(/\\/g, "/").trim();
-
-      if (
-        normalized.startsWith("http://") ||
-        normalized.startsWith("https://")
-      ) {
-        return normalized;
-      }
-
-      if (normalized.startsWith("src/uploads/")) {
-        return `${API_BASE}/${normalized.replace(/^src\//, "")}`;
-      }
-
-      if (normalized.startsWith("/src/uploads/")) {
-        return `${API_BASE}/${normalized.replace(/^\/src\//, "")}`;
-      }
-
-      if (normalized.startsWith("uploads/")) {
-        return `${API_BASE}/${normalized}`;
-      }
-
-      if (normalized.startsWith("/uploads/")) {
-        return `${API_BASE}${normalized}`;
-      }
-
-      return `${API_BASE}/uploads/${normalized.split("/").pop()}`;
-    });
+    return zone.evidenceFiles
+      .filter(Boolean)
+      .map((filePath) => resolveImageUrl(filePath));
   }, [zone.evidenceFiles]);
 
   const formatDate = (d) =>
@@ -332,6 +374,7 @@ export function ZoneCard({ zone, onEdit, onDelete }) {
           flexShrink: 0,
           display: "flex",
           flexDirection: "column",
+          opacity: zone.isActive === false ? 0.78 : 1,
         }}
       >
         <div
@@ -366,7 +409,7 @@ export function ZoneCard({ zone, onEdit, onDelete }) {
               position: "absolute",
               top: "10px",
               right: "10px",
-              background: "#e53e3e",
+              background: zone.isActive === false ? "#6b7280" : "#e53e3e",
               color: "#fff",
               fontSize: "11px",
               fontWeight: "600",
@@ -374,7 +417,7 @@ export function ZoneCard({ zone, onEdit, onDelete }) {
               borderRadius: "4px",
             }}
           >
-            Restricted
+            {zone.isActive === false ? "Disabled" : "Active"}
           </span>
         </div>
 
@@ -417,6 +460,15 @@ export function ZoneCard({ zone, onEdit, onDelete }) {
             <b>Time:</b> {zone.restrictedTime || "All Day"}
           </div>
 
+          <div
+            style={{
+              fontSize: "12px",
+              color: zone.isActive === false ? "#6b7280" : "#16a34a",
+            }}
+          >
+            <b>Status:</b> {zone.isActive === false ? "Disabled" : "Active"}
+          </div>
+
           <button
             onClick={() => setShowImages(true)}
             style={{
@@ -433,6 +485,32 @@ export function ZoneCard({ zone, onEdit, onDelete }) {
             }}
           >
             🖼 View Images {imageUrls.length > 0 ? `(${imageUrls.length})` : ""}
+          </button>
+
+          <button
+            onClick={() => onToggleStatus(zone)}
+            disabled={toggleLoading}
+            style={{
+              width: "100%",
+              padding: "7px 0",
+              fontSize: "12px",
+              fontWeight: "600",
+              border:
+                zone.isActive === false
+                  ? "1px solid #86efac"
+                  : "1px solid #fcd34d",
+              borderRadius: "7px",
+              background: zone.isActive === false ? "#f0fdf4" : "#fffbeb",
+              color: zone.isActive === false ? "#15803d" : "#b45309",
+              cursor: toggleLoading ? "not-allowed" : "pointer",
+              marginTop: "10px",
+            }}
+          >
+            {toggleLoading
+              ? "Saving..."
+              : zone.isActive === false
+                ? "✅ Activate"
+                : "⏸ Disable"}
           </button>
 
           <div style={{ display: "flex", gap: "8px", marginTop: "10px" }}>

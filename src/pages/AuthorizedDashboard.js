@@ -14,7 +14,6 @@ import {
 } from "../components/authorizedDashboard/DashboardModals";
 import AIAdvisoryPanel from "../components/authorizedDashboard/AIAdvisoryPanel";
 
-// ── Main Dashboard ───────────────────────────────────────────
 export default function AuthorizedDashboard() {
   const [activeTab, setActiveTab] = useState("areas");
   const [zones, setZones] = useState([]);
@@ -27,15 +26,14 @@ export default function AuthorizedDashboard() {
   });
   const [loadingZones, setLoadingZones] = useState(false);
 
-  // Modal visibility state
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingZone, setEditingZone] = useState(null);
   const [deletingZone, setDeletingZone] = useState(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [showAIAdvisory, setShowAIAdvisory] = useState(false);
 
-  // Search query
   const [searchQuery, setSearchQuery] = useState("");
+  const [toggleLoadingId, setToggleLoadingId] = useState(null);
 
   const fetchZones = async () => {
     setLoadingZones(true);
@@ -59,7 +57,6 @@ export default function AuthorizedDashboard() {
     }
   };
 
-  // ── Fetch reports from backend ─────────────────────────────
   const fetchReports = async () => {
     try {
       const token = localStorage.getItem("token");
@@ -95,7 +92,6 @@ export default function AuthorizedDashboard() {
     fetchReports();
   }, []);
 
-  // ── Delete zone ────────────────────────────────────────────
   const handleDeleteConfirm = async () => {
     if (!deletingZone) return;
     setDeleteLoading(true);
@@ -119,7 +115,63 @@ export default function AuthorizedDashboard() {
     }
   };
 
-  // ── Client side search filter ──────────────────────────────
+  const handleToggleStatus = async (zone) => {
+    setToggleLoadingId(zone._id);
+
+    try {
+      const token = localStorage.getItem("token");
+
+      const formData = new FormData();
+      formData.append("name", zone.name || "");
+      formData.append(
+        "location",
+        JSON.stringify({
+          lat: parseFloat(zone.location?.lat),
+          lng: parseFloat(zone.location?.lng),
+        }),
+      );
+      formData.append(
+        "startDate",
+        zone.startDate
+          ? new Date(zone.startDate).toISOString().split("T")[0]
+          : "",
+      );
+      if (zone.endDate) {
+        formData.append(
+          "endDate",
+          new Date(zone.endDate).toISOString().split("T")[0],
+        );
+      }
+      formData.append("restrictedTime", zone.restrictedTime || "All Day");
+      formData.append("isActive", zone.isActive === false ? "true" : "false");
+
+      const res = await fetch(`${API_BASE}/api/zones/${zone._id}`, {
+        method: "PUT",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        body: formData,
+      });
+
+      const ct = res.headers.get("content-type") || "";
+      if (!ct.includes("application/json")) {
+        throw new Error("Server unreachable");
+      }
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.message || "Failed to update status");
+      }
+
+      fetchZones();
+    } catch (err) {
+      alert(err.message || "Failed to update zone status");
+    } finally {
+      setToggleLoadingId(null);
+    }
+  };
+
   const filteredZones = zones.filter((z) => {
     const q = searchQuery.toLowerCase();
     if (!q) return true;
@@ -176,7 +228,6 @@ export default function AuthorizedDashboard() {
 
   return (
     <Layout>
-      {/* ── Page Title ── */}
       <div style={{ marginBottom: "28px" }}>
         <h1
           style={{
@@ -193,15 +244,12 @@ export default function AuthorizedDashboard() {
         </p>
       </div>
 
-      {/* ── Stat Cards ── */}
       <div style={{ display: "flex", gap: "16px", marginBottom: "28px" }}>
         {statCards.map((card) => (
           <StatCard key={card.label} {...card} />
         ))}
       </div>
 
-      {/* ── Tab Toggle ── */}
-      {/* ── Tab Toggle + AI Advisory ── */}
       <div
         style={{
           display: "flex",
@@ -264,7 +312,6 @@ export default function AuthorizedDashboard() {
         </button>
       </div>
 
-      {/* ── REPORTS TAB ── */}
       {activeTab === "reports" && (
         <div
           style={{
@@ -372,10 +419,8 @@ export default function AuthorizedDashboard() {
         </div>
       )}
 
-      {/* ── RESTRICTED AREAS TAB ── */}
       {activeTab === "areas" && (
         <div>
-          {/* Toolbar */}
           <div
             style={{
               display: "flex",
@@ -385,7 +430,6 @@ export default function AuthorizedDashboard() {
               flexWrap: "wrap",
             }}
           >
-            {/* Add button */}
             <button
               onClick={() => setShowAddModal(true)}
               style={{
@@ -407,7 +451,6 @@ export default function AuthorizedDashboard() {
               Add Restricted Area
             </button>
 
-            {/* Search bar */}
             <div style={{ position: "relative", flex: 1, maxWidth: "320px" }}>
               <span
                 style={{
@@ -436,7 +479,6 @@ export default function AuthorizedDashboard() {
             </div>
           </div>
 
-          {/* Zone cards grid */}
           {loadingZones ? (
             <p style={{ color: "#8a96b0", fontSize: "14px" }}>Loading zones…</p>
           ) : filteredZones.length === 0 ? (
@@ -485,6 +527,8 @@ export default function AuthorizedDashboard() {
                   zone={zone}
                   onEdit={(z) => setEditingZone(z)}
                   onDelete={(z) => setDeletingZone(z)}
+                  onToggleStatus={handleToggleStatus}
+                  toggleLoading={toggleLoadingId === zone._id}
                 />
               ))}
             </div>
@@ -492,7 +536,6 @@ export default function AuthorizedDashboard() {
         </div>
       )}
 
-      {/* ── Modals ── */}
       {showAddModal && (
         <ZoneFormModal
           zone={null}
