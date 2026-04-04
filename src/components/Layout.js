@@ -1,11 +1,3 @@
-// ============================================================
-// Layout.jsx — UPDATED
-// Changes:
-//   - Removed the dark blue horizontal top header bar entirely
-//   - Layout is now a simple flex row: dark blue vertical sidebar + main content
-//   - Background updated to #f3f5f8 to match prototype's light grey tone
-// ============================================================
-
 import Sidebar from "./Sidebar";
 import { useAuth } from "../hooks/useAuth";
 
