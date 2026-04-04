@@ -10,15 +10,15 @@ import AuthorizedDashboard from "./pages/AuthorizedDashboard";
 import AuthorizedProfile from "./pages/AuthorizedUserProfile";
 import IllegalReport from "./pages/IllegalReport";
 import MyReports from "./pages/MyReports";
-import Notifications from "./pages/Notifications";           // NEW
-import PublicUserProfile from "./pages/PublicUserProfile";   // NEW
+import Notifications from "./pages/Notifications";
+import PublicUserProfile from "./pages/PublicUserProfile";
+
 import ProtectedRoute from "./components/ProtectedRoute";
 
 function App() {
   return (
     <BrowserRouter>
       <Routes>
-
         {/* Default route */}
         <Route path="/" element={<Navigate to="/login" />} />
 
@@ -46,7 +46,7 @@ function App() {
           }
         />
 
-        {/* Report Form */}
+        {/* Report */}
         <Route
           path="/report"
           element={
@@ -86,7 +86,7 @@ function App() {
           }
         />
 
-        {/* Notifications — NEW */}
+        {/* Notifications */}
         <Route
           path="/notifications"
           element={
@@ -96,7 +96,7 @@ function App() {
           }
         />
 
-        {/* Public User Profile — NEW */}
+        {/* Public User Profile */}
         <Route
           path="/public/profile"
           element={
@@ -106,7 +106,7 @@ function App() {
           }
         />
 
-        {/* ADMIN DASHBOARD */}
+        {/* ADMIN */}
         <Route
           path="/admin"
           element={
@@ -125,7 +125,7 @@ function App() {
           }
         />
 
-        {/* Zoologist Routes */}
+        {/* ZOOLOGIST */}
         <Route
           path="/zoologist"
           element={
@@ -135,7 +135,7 @@ function App() {
           }
         />
 
-        {/* Authorized Person Routes */}
+        {/* AUTHORIZED */}
         <Route
           path="/authorized"
           element={
@@ -153,7 +153,6 @@ function App() {
             </ProtectedRoute>
           }
         />
-
       </Routes>
     </BrowserRouter>
   );

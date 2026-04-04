@@ -46,6 +46,20 @@ export default function Signup() {
   // ✅ FIX: Missing states (no logic change)
   const [loading, setLoading] = useState(false);
   const [focusedField, setFocusedField] = useState(null);
+  const [districts, setDistricts] = useState([]);
+
+  // Fetch districts from backend when component mounts
+  useEffect(() => {
+    const fetchDistricts = async () => {
+      try {
+        const res = await axios.get("http://localhost:5000/api/districts");
+        setDistricts(res.data.districts);
+      } catch (err) {
+        console.error("Failed to load districts:", err);
+      }
+    };
+    fetchDistricts();
+  }, []);
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -235,14 +249,34 @@ export default function Signup() {
           )}
 
           {form.role === "AUTHORIZED_PERSON" && (
-            <input
-              name="district"
-              placeholder="Enter your district"
-              value={form.district}
-              onChange={handleChange}
-              style={inputStyle}
-              required
-            />
+            <div style={{ marginTop: "14px" }}>
+              <label style={labelStyle}>District</label>
+              <select
+                name="district"
+                value={form.district}
+                onChange={handleChange}
+                required
+                style={{
+                  ...inputStyle,
+                  ...(focusedField === "district" ? focusStyle : {}),
+                  appearance: "none",
+                  backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%236b7a99' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E")`,
+                  backgroundRepeat: "no-repeat",
+                  backgroundPosition: "right 12px center",
+                }}
+                onFocus={() => setFocusedField("district")}
+                onBlur={() => setFocusedField(null)}
+              >
+                <option value="" disabled>
+                  Select your district
+                </option>
+                {districts.map((d) => (
+                  <option key={d} value={d}>
+                    {d}
+                  </option>
+                ))}
+              </select>
+            </div>
           )}
 
           <button type="submit" style={inputStyle}>
