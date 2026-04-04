@@ -5,7 +5,12 @@ import Login from "./pages/Login";
 import AdminDashboard from "./pages/AdminDashboard";
 import AdminUsers from "./pages/AdminUsers";
 import PublicDashboard from "./pages/PublicDashboard";
+import ZoologistLayout from "./pages/ZoologistLayout";
 import ZoologistDashboard from "./pages/ZoologistDashboard";
+import SpeciesListPage from "./pages/zoologist/SpeciesListPage";
+import SpeciesFormPage from "./pages/zoologist/SpeciesFormPage";
+import SpeciesNearbyPage from "./pages/zoologist/SpeciesNearbyPage";
+import ZoologistProfile from "./pages/zoologist/ZoologistProfile";
 import AuthorizedDashboard from "./pages/AuthorizedDashboard";
 import AuthorizedProfile from "./pages/AuthorizedUserProfile";
 import IllegalReport from "./pages/IllegalReport";
@@ -90,10 +95,18 @@ function App() {
           path="/zoologist"
           element={
             <ProtectedRoute role="ZOOLOGIST">
-              <ZoologistDashboard />
+              <ZoologistLayout />
             </ProtectedRoute>
           }
-        />
+        >
+          <Route index element={<ZoologistDashboard />} />
+          <Route path="species" element={<SpeciesListPage />} />
+          <Route path="species/new" element={<SpeciesFormPage />} />
+          <Route path="species/nearby" element={<SpeciesNearbyPage />} />
+          <Route path="species/:id/edit" element={<SpeciesFormPage />} />
+          <Route path="profile" element={<ZoologistProfile />} />
+        
+        </Route>
 
         {/* Authorized Person Routes */}
         <Route

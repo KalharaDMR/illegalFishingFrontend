@@ -27,10 +27,36 @@ export default function Sidebar({ role }) {
         ];
       case "ZOOLOGIST":
         return [
-          { name: "Dashboard", path: "/zoologist", icon: "⬡" },
-          { name: "Validate Reports", path: "/zoologist/validate", icon: "◎" },
-          { name: "Species Analysis", path: "/zoologist/species", icon: "◉" },
-          { name: "Profile", path: "/zoologist/profile", icon: "◈" },
+          {
+            name: "Dashboard",
+            path: "/zoologist",
+            icon: "⬡",
+            isActive: (p) => p === "/zoologist",
+          },
+          {
+            name: "All species",
+            path: "/zoologist/species",
+            icon: "◉",
+            isActive: (p) => p === "/zoologist/species" || /^\/zoologist\/species\/[^/]+\/edit$/.test(p),
+          },
+          {
+            name: "Add species",
+            path: "/zoologist/species/new",
+            icon: "＋",
+            isActive: (p) => p === "/zoologist/species/new",
+          },
+          {
+            name: "Map View",
+            path: "/zoologist/species/nearby",
+            icon: "◎",
+            isActive: (p) => p === "/zoologist/species/nearby",
+          },
+          {
+            name: "Profile",
+            path: "/zoologist/profile",
+            icon: "◈",
+            isActive: (p) => p === "/zoologist/profile",
+          }
         ];
       case "AUTHORIZED_PERSON":
         return [
@@ -94,7 +120,9 @@ export default function Sidebar({ role }) {
       {/* Nav Items */}
       <nav style={{ flex: 1, padding: "16px 12px", display: "flex", flexDirection: "column", gap: "2px" }}>
         {menuItems.map((item) => {
-          const isActive = location.pathname === item.path;
+          const isActive = item.isActive
+            ? item.isActive(location.pathname)
+            : location.pathname === item.path;
           return (
             <Link
               key={item.path}

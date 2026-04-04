@@ -33,6 +33,7 @@ export default function Login() {
 
       localStorage.setItem("token", res.data.token);
       localStorage.setItem("role", res.data.user.role);
+      localStorage.setItem("user", JSON.stringify(res.data.user));
 
       switch (res.data.user.role) {
         case "ADMIN":       navigate("/admin"); break;

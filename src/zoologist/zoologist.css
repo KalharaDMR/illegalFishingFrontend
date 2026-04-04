@@ -1,0 +1,110 @@
+/* Zoologist portal — animations & micro-interactions (FishWatch theme) */
+
+@keyframes zooFadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes zooFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes zooScaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes zooShimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.zoo-animate-fade-up {
+  animation: zooFadeUp 0.55s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.zoo-animate-fade-in {
+  animation: zooFadeIn 0.4s ease forwards;
+}
+
+.zoo-animate-scale-in {
+  animation: zooScaleIn 0.35s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.zoo-stagger-children > * {
+  opacity: 0;
+  animation: zooFadeUp 0.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.zoo-stagger-children > *:nth-child(1) {
+  animation-delay: 0.04s;
+}
+.zoo-stagger-children > *:nth-child(2) {
+  animation-delay: 0.1s;
+}
+.zoo-stagger-children > *:nth-child(3) {
+  animation-delay: 0.16s;
+}
+.zoo-stagger-children > *:nth-child(4) {
+  animation-delay: 0.22s;
+}
+.zoo-stagger-children > *:nth-child(5) {
+  animation-delay: 0.28s;
+}
+.zoo-stagger-children > *:nth-child(6) {
+  animation-delay: 0.34s;
+}
+
+.zoo-card-hover {
+  transition:
+    transform 0.2s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.zoo-card-hover:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 32px rgba(10, 22, 40, 0.1);
+}
+
+.zoo-btn-press:active {
+  transform: scale(0.98);
+}
+
+.zoo-skeleton {
+  background: linear-gradient(
+    90deg,
+    #e8ecf2 0%,
+    #f4f6f9 50%,
+    #e8ecf2 100%
+  );
+  background-size: 200% 100%;
+  animation: zooShimmer 1.2s ease-in-out infinite;
+  border-radius: 8px;
+}
+
+.zoo-focus-ring:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(34, 211, 176, 0.35);
+}
