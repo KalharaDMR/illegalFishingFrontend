@@ -5,19 +5,26 @@ export default function Layout({ children }) {
   const { role } = useAuth();
 
   return (
-    <div style={{
-      display: "flex",
-      height: "100vh",
-      fontFamily: "'DM Sans', 'Segoe UI', system-ui, sans-serif",
-      background: "#f0f4f8",
-    }}>
+    <div
+      style={{
+        display: "flex", // side-by-side: sidebar | main
+        height: "100vh",
+        fontFamily: "'DM Sans', 'Segoe UI', system-ui, sans-serif",
+        background: "#f3f5f8",
+      }}
+    >
+      {/* Dark blue vertical sidebar — unchanged */}
       <Sidebar role={role} />
-      <main style={{
-        flex: 1,
-        overflowY: "auto",
-        background: "#f0f4f8",
-        padding: "32px",
-      }}>
+
+      {/* Scrollable main content area */}
+      <main
+        style={{
+          flex: 1,
+          overflowY: "auto",
+          background: "#f3f5f8",
+          padding: "36px 40px",
+        }}
+      >
         {children}
       </main>
     </div>
