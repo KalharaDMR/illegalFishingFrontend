@@ -30,12 +30,24 @@ export default function PublicDashboard() {
   const [activeTab, setActiveTab] = useState("zones");
   const [loadingZones, setLoadingZones] = useState(true);
   const [loadingSpecies, setLoadingSpecies] = useState(true);
+  const [userName, setUserName] = useState(""); // ← added
 
   useEffect(() => {
     fetchZones();
     fetchSpecies();
     fetchReportStats();
+    fetchUserName(); // ← added
   }, []);
+
+  // ← added
+  const fetchUserName = async () => {
+    try {
+      const res = await api.get("/profile/public/me");
+      setUserName(res.data.name || "");
+    } catch {
+      setUserName("");
+    }
+  };
 
   const fetchZones = async () => {
     try {
@@ -82,7 +94,7 @@ export default function PublicDashboard() {
     <Layout>
       <div style={{ fontFamily: "'DM Sans', 'Segoe UI', system-ui, sans-serif" }}>
 
-        {/* ── Welcome hero (your original) ── */}
+        {/* ── Welcome hero ── */}
         <div style={{
           background: "linear-gradient(135deg, #0a1628 0%, #0d2a45 100%)",
           borderRadius: "16px",
@@ -94,7 +106,7 @@ export default function PublicDashboard() {
           <div style={{ position: "absolute", inset: 0, opacity: 0.05, backgroundImage: "radial-gradient(circle, #22d3b0 1px, transparent 1px)", backgroundSize: "32px 32px" }} />
           <div style={{ position: "relative" }}>
             <div style={{ fontSize: "11px", color: "#22d3b0", letterSpacing: "0.1em", textTransform: "uppercase", fontWeight: "500", marginBottom: "10px" }}>
-              Public Portal
+              {userName || "Public Portal"} {/* ← changed */}
             </div>
             <h1 style={{ fontSize: "26px", fontWeight: "600", color: "#f0f6ff", margin: "0 0 10px", letterSpacing: "-0.01em" }}>
               Welcome back
@@ -105,7 +117,7 @@ export default function PublicDashboard() {
           </div>
         </div>
 
-        {/* ── Stats row (NEW) ── */}
+        {/* ── Stats row ── */}
         <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "12px", marginBottom: "28px" }}>
           {[
             { label: "Reports Filed", value: stats.total, color: "#0ea5e9" },
@@ -127,7 +139,7 @@ export default function PublicDashboard() {
           ))}
         </div>
 
-        {/* ── Quick Actions (your original, extended with Notifications) ── */}
+        {/* ── Quick Actions ── */}
         <div style={{ marginBottom: "28px" }}>
           <h2 style={{ fontSize: "13px", fontWeight: "600", color: "#8a96b0", letterSpacing: "0.06em", textTransform: "uppercase", margin: "0 0 14px" }}>
             Quick Actions
@@ -147,7 +159,6 @@ export default function PublicDashboard() {
                   <div style={{ fontSize: "22px", marginBottom: "12px", color: action.accent }}>{action.icon}</div>
                   <div style={{ fontSize: "15px", fontWeight: "600", color: "#0a1628", marginBottom: "6px" }}>{action.label}</div>
                   <div style={{ fontSize: "13px", color: "#8a96b0", lineHeight: "1.5" }}>{action.desc}</div>
-                  {/* Notification badge */}
                   {action.badge && notifCount > 0 && (
                     <span style={{
                       position: "absolute", top: "12px", right: "12px",
@@ -164,13 +175,12 @@ export default function PublicDashboard() {
           </div>
         </div>
 
-        {/* ── Marine Intelligence panels (NEW) ── */}
+        {/* ── Marine Intelligence panels ── */}
         <div>
           <h2 style={{ fontSize: "13px", fontWeight: "600", color: "#8a96b0", letterSpacing: "0.06em", textTransform: "uppercase", margin: "0 0 14px" }}>
             Marine Intelligence
           </h2>
 
-          {/* Tab row */}
           <div style={{ display: "flex", gap: "8px", marginBottom: "16px", borderBottom: "2px solid #e4eaf3", paddingBottom: "0" }}>
             {[
               { key: "zones", label: "🚫 Restricted Zones", count: zones.length },
@@ -201,7 +211,6 @@ export default function PublicDashboard() {
             ))}
           </div>
 
-          {/* Zones panel */}
           {activeTab === "zones" && (
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: "14px" }}>
               {loadingZones ? (
@@ -246,7 +255,6 @@ export default function PublicDashboard() {
             </div>
           )}
 
-          {/* Species panel */}
           {activeTab === "species" && (
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: "14px" }}>
               {loadingSpecies ? (
