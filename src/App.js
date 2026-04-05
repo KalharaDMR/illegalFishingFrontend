@@ -18,6 +18,7 @@ import IllegalReport from "./pages/IllegalReport";
 import MyReports from "./pages/MyReports";
 import Notifications from "./pages/Notifications";
 import PublicUserProfile from "./pages/PublicUserProfile";
+import 'leaflet/dist/leaflet.css';
 
 import ProtectedRoute from "./components/ProtectedRoute";
 import SubmitInvestigation from "./pages/authorized/SubmitInvestigation";
