@@ -1,7 +1,8 @@
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 import Signup from "./pages/Signup";
 import Login from "./pages/Login";
+import Home from "./pages/Home";
 import AdminDashboard from "./pages/AdminDashboard";
 import AdminUsers from "./pages/AdminUsers";
 import PublicDashboard from "./pages/PublicDashboard";
@@ -23,7 +24,7 @@ function App() {
     <BrowserRouter>
       <Routes>
         {/* Default route */}
-        <Route path="/" element={<Navigate to="/login" />} />
+        <Route path="/" element={<Home />} />
 
         {/* Auth pages */}
         <Route path="/login" element={<Login />} />

@@ -48,6 +48,7 @@ export default function Signup() {
     const fetchDistricts = async () => {
       try {
         const res = await axios.get("http://localhost:5000/api/districts");
+        console.log("Fetched districts:", res.data.districts);
         setDistricts(res.data.districts);
       } catch (err) {
         console.error("Failed to load districts:", err);
@@ -80,13 +81,14 @@ export default function Signup() {
     }
 
     try {
+      console.log(data)
       const res = await axios.post(
         "http://localhost:5000/api/auth/signup",
         data,
       );
       alert(res.data.message);
     } catch (err) {
-      alert(err.response.data.message);
+      alert(err.response?.data?.message || "Registration failed");
     }
   };
 
