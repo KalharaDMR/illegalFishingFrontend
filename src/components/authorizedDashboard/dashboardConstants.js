@@ -6,52 +6,48 @@ export const API_BASE =
 
 export const inputStyle = {
   width: "100%",
-  border: "1px solid #dde3ee",
-  borderRadius: "8px",
-  padding: "9px 12px",
+  border: "1.5px solid #d0d9e8",
+  borderRadius: "10px",
+  padding: "10px 14px",
   fontSize: "13px",
-  color: "#1a2235",
-  background: "#f8fafc",
+  color: "#0d1f3c",
+  background: "#ffffff",
   outline: "none",
   boxSizing: "border-box",
+  fontFamily: "'DM Sans', sans-serif",
+  transition: "border-color 0.18s ease, box-shadow 0.18s ease",
 };
 
 // ════════════════════════════════════════════════════════════════
-// INVESTIGATION CONSTANTS  (added for investigation management)
-// Everything above this line belongs to the zone/reports module
+// INVESTIGATION CONSTANTS
 // ════════════════════════════════════════════════════════════════
 
-// Focus ring applied on input focus inside SubmitInvestigation
 export const focusStyle = {
-  borderColor: "#22d3b0",
-  boxShadow: "0 0 0 3px rgba(34,211,176,0.12)",
+  borderColor: "#0ea5e9",
+  boxShadow: "0 0 0 3px rgba(14,165,233,0.15)",
 };
 
-// Report status badge colours (matches IllegalReport.status enum)
 export const reportStatusConfig = {
-  PENDING: { bg: "#faeeda", color: "#854f0b", label: "Pending" },
-  INVESTIGATING: { bg: "#e6f1fb", color: "#185fa5", label: "Investigating" },
-  RESOLVED: { bg: "#e1f5ee", color: "#0f6e56", label: "Resolved" },
+  PENDING: { bg: "#fff8e6", color: "#92580a", label: "Pending" },
+  INVESTIGATING: { bg: "#e0f2fe", color: "#075985", label: "Investigating" },
+  RESOLVED: { bg: "#dcfce7", color: "#166534", label: "Resolved" },
 };
 
-// Investigation status badge colours (investigationStatus field)
 export const invStatusConfig = {
-  NOT_STARTED: { bg: "#f1efe8", color: "#5f5e5a", label: "Not Started" },
-  INVESTIGATING: { bg: "#e6f1fb", color: "#185fa5", label: "In Progress" },
-  COMPLETED: { bg: "#e1f5ee", color: "#0f6e56", label: "Completed" },
+  NOT_STARTED: { bg: "#f1f5f9", color: "#475569", label: "Not Started" },
+  INVESTIGATING: { bg: "#e0f2fe", color: "#075985", label: "In Progress" },
+  COMPLETED: { bg: "#dcfce7", color: "#166534", label: "Completed" },
 };
 
-// Action taken badge colours (matches Investigation.actionTaken enum)
 export const actionConfig = {
-  NO_ACTION: { bg: "#f1efe8", color: "#5f5e5a" },
-  WARNING: { bg: "#faeeda", color: "#854f0b" },
-  FINE: { bg: "#fcebeb", color: "#a32d2d" },
-  EQUIPMENT_CONFISCATED: { bg: "#e6f1fb", color: "#185fa5" },
-  ARREST: { bg: "#fcebeb", color: "#7c1d1d" },
-  OTHER: { bg: "#f1efe8", color: "#5f5e5a" },
+  NO_ACTION: { bg: "#f1f5f9", color: "#475569" },
+  WARNING: { bg: "#fff8e6", color: "#92580a" },
+  FINE: { bg: "#fee2e2", color: "#991b1b" },
+  EQUIPMENT_CONFISCATED: { bg: "#e0f2fe", color: "#075985" },
+  ARREST: { bg: "#fee2e2", color: "#7f1d1d" },
+  OTHER: { bg: "#f1f5f9", color: "#475569" },
 };
 
-// Radio options for the action taken field in SubmitInvestigation
 export const ACTION_OPTIONS = [
   { value: "NO_ACTION", label: "No Action" },
   { value: "WARNING", label: "Warning Issued" },

@@ -108,12 +108,25 @@ const normalizeResponse = (payload) => {
       payload.advisory?.recommendedActions ||
       [],
 
+    expectedImpact:
+      payload.expectedImpact || payload.advisory?.expectedImpact || [],
+
+    patrolTiming: payload.patrolTiming || payload.advisory?.patrolTiming || {},
+
+    priorityAreas:
+      payload.priorityAreas || payload.advisory?.priorityAreas || [],
+
     zoneAnalysis:
       payload.zoneAnalysis ||
       payload.advisory?.zoneAnalysis ||
       payload.zoneFacts ||
       payload.advisory?.zoneFacts ||
       [],
+
+    availableZones: payload.availableZones || [],
+
+    selectedZoneId: payload.selectedZoneId || "",
+    selectedZoneName: payload.selectedZoneName || "",
 
     futureOutlook:
       payload.futureOutlook ||
@@ -191,16 +204,23 @@ export default function AIAdvisoryPanel({ onClose }) {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState("");
+  const [selectedZoneId, setSelectedZoneId] = useState("");
 
-  const loadAdvisory = async (isRefresh = false) => {
+  const loadAdvisory = async (
+    isRefresh = false,
+    zoneIdParam = selectedZoneId,
+  ) => {
     try {
       setError("");
       if (isRefresh) setRefreshing(true);
       else setLoading(true);
 
       const token = localStorage.getItem("token");
+      const query = zoneIdParam
+        ? `?zoneId=${encodeURIComponent(zoneIdParam)}`
+        : "";
 
-      const res = await fetch(`${API_BASE}/api/zones/ai-advisory`, {
+      const res = await fetch(`${API_BASE}/api/zones/ai-advisory${query}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -223,8 +243,16 @@ export default function AIAdvisoryPanel({ onClose }) {
         );
       }
 
+      const normalized = normalizeResponse(payload);
+
       setRaw(payload);
-      setData(normalizeResponse(payload));
+      setData(normalized);
+
+      if (payload.selectedZoneId !== undefined) {
+        setSelectedZoneId(payload.selectedZoneId || "");
+      } else if (!zoneIdParam && payload.availableZones?.length) {
+        setSelectedZoneId("");
+      }
     } catch (err) {
       console.error("AI advisory load failed:", err);
       setError(err.message || "Unable to load AI advisory");
@@ -238,17 +266,46 @@ export default function AIAdvisoryPanel({ onClose }) {
     loadAdvisory();
   }, []);
 
+  const handleZoneChange = async (e) => {
+    const value = e.target.value;
+    setSelectedZoneId(value);
+    await loadAdvisory(false, value);
+  };
+
   const risk = useMemo(
     () => getRiskMeta(data?.overallRiskLevel),
     [data?.overallRiskLevel],
   );
 
-  const primaryZone = useMemo(() => {
+  const selectedZoneDetails = useMemo(() => {
     if (!data?.zoneAnalysis?.length) return null;
+
+    if (selectedZoneId) {
+      return (
+        data.zoneAnalysis.find(
+          (zone) =>
+            zone.zoneId === selectedZoneId ||
+            zone._id === selectedZoneId ||
+            zone.id === selectedZoneId,
+        ) || data.zoneAnalysis[0]
+      );
+    }
+
+    if (data?.selectedZoneId) {
+      return (
+        data.zoneAnalysis.find(
+          (zone) =>
+            zone.zoneId === data.selectedZoneId ||
+            zone._id === data.selectedZoneId ||
+            zone.id === data.selectedZoneId,
+        ) || data.zoneAnalysis[0]
+      );
+    }
+
     return [...data.zoneAnalysis].sort(
       (a, b) => (b.riskScore || 0) - (a.riskScore || 0),
     )[0];
-  }, [data?.zoneAnalysis]);
+  }, [data?.zoneAnalysis, data?.selectedZoneId, selectedZoneId]);
 
   return (
     <div style={overlayStyle} onClick={onClose}>
@@ -422,6 +479,77 @@ export default function AIAdvisoryPanel({ onClose }) {
               <>
                 <div
                   style={{
+                    ...sectionCard,
+                    marginBottom: "18px",
+                  }}
+                >
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                      gap: "12px",
+                      flexWrap: "wrap",
+                      marginBottom: "14px",
+                    }}
+                  >
+                    <h3 style={headingText}>Area Selection</h3>
+                    <span
+                      style={{
+                        fontSize: "12px",
+                        color: "#64748b",
+                        background: "#f8fafc",
+                        border: "1px solid #e2e8f0",
+                        padding: "6px 10px",
+                        borderRadius: "999px",
+                      }}
+                    >
+                      Generate advisory by selected area
+                    </span>
+                  </div>
+
+                  <div
+                    style={{
+                      display: "flex",
+                      gap: "12px",
+                      alignItems: "center",
+                      flexWrap: "wrap",
+                    }}
+                  >
+                    <select
+                      value={selectedZoneId}
+                      onChange={handleZoneChange}
+                      style={{
+                        minWidth: "260px",
+                        height: "42px",
+                        borderRadius: "12px",
+                        border: "1px solid #cbd5e1",
+                        background: "#fff",
+                        color: "#0f172a",
+                        fontSize: "13px",
+                        fontWeight: 600,
+                        padding: "0 12px",
+                        outline: "none",
+                      }}
+                    >
+                      <option value="">All Active Areas</option>
+                      {(data?.availableZones || []).map((zone) => (
+                        <option key={zone.zoneId} value={zone.zoneId}>
+                          {zone.zoneName}
+                        </option>
+                      ))}
+                    </select>
+
+                    <span style={mutedText}>
+                      {selectedZoneId
+                        ? "Showing advisory for the selected restricted area."
+                        : "Showing combined advisory across all active areas."}
+                    </span>
+                  </div>
+                </div>
+
+                <div
+                  style={{
                     marginBottom: "18px",
                     padding: "16px 18px",
                     borderRadius: "18px",
@@ -517,17 +645,30 @@ export default function AIAdvisoryPanel({ onClose }) {
                   >
                     <InfoPill
                       label="Area"
-                      value={primaryZone?.zoneName || "Restricted Area"}
+                      value={
+                        selectedZoneDetails?.zoneName ||
+                        data?.selectedZoneName ||
+                        "Restricted Area"
+                      }
                     />
                     <InfoPill
                       label="Risk Level"
                       value={
-                        primaryZone?.ecologicalRisk || data?.overallRiskLevel
+                        selectedZoneDetails?.ecologicalRisk ||
+                        data?.overallRiskLevel
                       }
                     />
                     <InfoPill
                       label="Area Status"
-                      value={primaryZone?.status || "ACTIVE"}
+                      value={selectedZoneDetails?.status || "ACTIVE"}
+                    />
+                    <InfoPill
+                      label="Restricted Time"
+                      value={selectedZoneDetails?.restrictedTime || "All Day"}
+                    />
+                    <InfoPill
+                      label="Evidence Count"
+                      value={selectedZoneDetails?.evidenceCount ?? "0"}
                     />
                   </div>
                 </div>
@@ -614,6 +755,7 @@ export default function AIAdvisoryPanel({ onClose }) {
                     display: "grid",
                     gridTemplateColumns: "1fr 1fr",
                     gap: "18px",
+                    marginBottom: "18px",
                   }}
                 >
                   <div style={sectionCard}>
@@ -664,6 +806,62 @@ export default function AIAdvisoryPanel({ onClose }) {
                     ) : (
                       <EmptyList text="No recommended actions were returned by the analysis." />
                     )}
+                  </div>
+                </div>
+
+                <div
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns: "1fr 1fr",
+                    gap: "18px",
+                  }}
+                >
+                  <div style={sectionCard}>
+                    <h3 style={{ ...headingText, marginBottom: "14px" }}>
+                      Expected Impact
+                    </h3>
+                    {data?.expectedImpact?.length ? (
+                      <ul className="ai-list">
+                        {data.expectedImpact.map((item, index) => (
+                          <li key={index}>{item}</li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <EmptyList text="No expected impact details were returned by the analysis." />
+                    )}
+                  </div>
+
+                  <div style={sectionCard}>
+                    <h3 style={{ ...headingText, marginBottom: "14px" }}>
+                      Patrol Timing
+                    </h3>
+                    <div
+                      style={{
+                        display: "flex",
+                        gap: "12px",
+                        flexWrap: "wrap",
+                        marginBottom: "12px",
+                      }}
+                    >
+                      <InfoPill
+                        label="Highest Priority Window"
+                        value={data?.patrolTiming?.highestPriorityWindow}
+                      />
+                    </div>
+                    <div
+                      style={{
+                        padding: "14px",
+                        borderRadius: "14px",
+                        background: "#f8fafc",
+                        border: "1px solid #e2e8f0",
+                        color: "#334155",
+                        fontSize: "14px",
+                        lineHeight: 1.7,
+                      }}
+                    >
+                      {data?.patrolTiming?.notes ||
+                        "No patrol timing notes available."}
+                    </div>
                   </div>
                 </div>
 

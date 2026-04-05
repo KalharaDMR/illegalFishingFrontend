@@ -2,154 +2,205 @@ import React, { useState } from "react";
 import { API_BASE, inputStyle } from "./dashboardConstants";
 import LeafletLocationPicker from "./LeafletLocationPicker";
 
-const fieldLabel = (text) => ({
-  fontSize: "12px",
-  fontWeight: "600",
-  color: "#3a4565",
-  display: "block",
-  marginBottom: "6px",
-  letterSpacing: "0.03em",
-  textTransform: "uppercase",
-});
+const FONT_IMPORT = `@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap');`;
 
-const sectionStyle = {
-  marginBottom: "16px",
+const Icon = ({ d, size = 16, strokeWidth = 1.6 }) => (
+  <svg
+    width={size}
+    height={size}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth={strokeWidth}
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    style={{ display: "block", flexShrink: 0 }}
+  >
+    <path d={d} />
+  </svg>
+);
+
+const IC = {
+  x: "M18 6L6 18M6 6l12 12",
+  trash: "M3 6h18M8 6V4h8v2M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6",
+  pin: "M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5a2.5 2.5 0 110-5 2.5 2.5 0 010 5z",
+  edit: "M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z",
+  check: "M20 6L9 17l-5-5",
+  warning:
+    "M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0zM12 9v4M12 17h.01",
+  img: "M21 15l-5-5L5 21M3 3h18v18H3zM8.5 10a1.5 1.5 0 100-3 1.5 1.5 0 000 3z",
 };
 
-// ── Delete Confirm Dialog ────────────────────────────────────
+const sectionStyle = { marginBottom: "18px" };
+
+const FieldLabel = ({ children }) => (
+  <label
+    style={{
+      fontSize: "11px",
+      fontWeight: "700",
+      color: "#475569",
+      display: "block",
+      marginBottom: "7px",
+      letterSpacing: "0.08em",
+      textTransform: "uppercase",
+      fontFamily: "'DM Sans', sans-serif",
+    }}
+  >
+    {children}
+  </label>
+);
+
+// ── Delete Confirm Modal ──────────────────────────────────────
 export function DeleteConfirmModal({ zone, onConfirm, onCancel, loading }) {
   return (
     <div
       style={{
         position: "fixed",
         inset: 0,
-        background: "rgba(10,22,40,0.65)",
-        backdropFilter: "blur(6px)",
+        background: "rgba(8,18,40,0.62)",
+        backdropFilter: "blur(8px)",
         zIndex: 1100,
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
         padding: "20px",
-        animation: "fadeIn 0.15s ease",
       }}
     >
-      <style>{`
-        @keyframes fadeIn { from { opacity:0 } to { opacity:1 } }
-        @keyframes slideUp { from { opacity:0; transform:translateY(16px) } to { opacity:1; transform:translateY(0) } }
-        .del-cancel:hover { background: #eef0f5 !important; }
-        .del-confirm:hover:not(:disabled) { background: #c53030 !important; }
-      `}</style>
+      <style>
+        {FONT_IMPORT +
+          `
+        @keyframes slideUp { from { opacity:0; transform:translateY(18px) scale(0.97) } to { opacity:1; transform:translateY(0) scale(1) } }
+      `}
+      </style>
 
       <div
         style={{
-          background: "#fff",
-          borderRadius: "18px",
-          padding: "0",
+          background: "#ffffff",
+          borderRadius: "22px",
           maxWidth: "400px",
           width: "100%",
           boxShadow:
-            "0 24px 70px rgba(10,22,40,0.25), 0 0 0 1px rgba(0,0,0,0.04)",
+            "0 32px 80px rgba(8,18,40,0.2), 0 0 0 1.5px rgba(232,72,68,0.1)",
           overflow: "hidden",
-          animation: "slideUp 0.2s cubic-bezier(0.16,1,0.3,1)",
+          animation: "slideUp 0.22s cubic-bezier(0.16,1,0.3,1)",
+          fontFamily: "'DM Sans', sans-serif",
         }}
       >
-        {/* danger stripe */}
+        {/* Top accent bar */}
         <div
           style={{
-            height: "5px",
-            background: "linear-gradient(90deg, #e53e3e, #f87171)",
+            height: "4px",
+            background: "linear-gradient(90deg, #dc2626, #f87171, #fca5a5)",
           }}
         />
 
-        <div style={{ padding: "26px 28px 28px" }}>
+        <div style={{ padding: "30px 30px 28px" }}>
           <div
             style={{
-              width: "44px",
-              height: "44px",
+              width: "48px",
+              height: "48px",
               borderRadius: "14px",
-              background: "#fff5f5",
-              border: "1px solid #fecaca",
+              background: "linear-gradient(135deg, #fff1f2, #fee2e2)",
+              border: "1.5px solid #fecaca",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              fontSize: "20px",
-              marginBottom: "14px",
+              color: "#dc2626",
+              marginBottom: "18px",
+              boxShadow: "0 4px 14px rgba(220,38,38,0.12)",
             }}
           >
-            🗑
+            <Icon d={IC.trash} size={20} strokeWidth={1.6} />
           </div>
 
           <h3
             style={{
-              margin: "0 0 8px",
-              fontSize: "17px",
+              margin: "0 0 9px",
+              fontSize: "18px",
               fontWeight: "700",
-              color: "#0a1628",
-              letterSpacing: "-0.3px",
+              color: "#0d1f3c",
+              letterSpacing: "-0.4px",
             }}
           >
             Delete Zone
           </h3>
           <p
             style={{
-              margin: "0 0 22px",
-              fontSize: "13px",
-              color: "#6b7a99",
+              margin: "0 0 26px",
+              fontSize: "13.5px",
+              color: "#5a6a86",
               lineHeight: 1.65,
             }}
           >
             Are you sure you want to delete{" "}
-            <strong style={{ color: "#0a1628" }}>{zone.name}</strong>? This
-            action cannot be undone.
+            <strong style={{ color: "#0d1f3c", fontWeight: "700" }}>
+              {zone.name}
+            </strong>
+            ? This action cannot be undone.
           </p>
 
           <div style={{ display: "flex", gap: "10px" }}>
             <button
-              className="del-cancel"
               onClick={onCancel}
               style={{
                 flex: 1,
-                padding: "11px",
-                border: "1px solid #dde3ee",
-                borderRadius: "10px",
+                padding: "12px 0",
+                border: "1.5px solid #e2e8f0",
+                borderRadius: "11px",
                 background: "#f8fafc",
-                color: "#3a4565",
-                fontSize: "13px",
-                fontWeight: "500",
+                color: "#334155",
+                fontSize: "13.5px",
+                fontWeight: "600",
                 cursor: "pointer",
-                transition: "background 0.15s ease",
+                transition: "all 0.15s",
+                fontFamily: "'DM Sans', sans-serif",
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = "#eef2f8";
+                e.currentTarget.style.borderColor = "#c8d3e8";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = "#f8fafc";
+                e.currentTarget.style.borderColor = "#e2e8f0";
               }}
             >
               Cancel
             </button>
             <button
-              className="del-confirm"
               onClick={onConfirm}
               disabled={loading}
               style={{
                 flex: 1,
-                padding: "11px",
+                padding: "12px 0",
                 border: "none",
-                borderRadius: "10px",
-                background: loading ? "#fca5a5" : "#e53e3e",
+                borderRadius: "11px",
+                background: loading
+                  ? "#fca5a5"
+                  : "linear-gradient(135deg, #dc2626, #b91c1c)",
                 color: "#fff",
-                fontSize: "13px",
-                fontWeight: "600",
+                fontSize: "13.5px",
+                fontWeight: "700",
                 cursor: loading ? "not-allowed" : "pointer",
-                transition: "background 0.15s ease",
+                boxShadow: loading ? "none" : "0 6px 18px rgba(220,38,38,0.3)",
+                transition: "all 0.15s",
+                fontFamily: "'DM Sans', sans-serif",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                gap: "6px",
+                gap: "7px",
+              }}
+              onMouseEnter={(e) => {
+                if (!loading)
+                  e.currentTarget.style.background =
+                    "linear-gradient(135deg, #b91c1c, #991b1b)";
+              }}
+              onMouseLeave={(e) => {
+                if (!loading)
+                  e.currentTarget.style.background =
+                    "linear-gradient(135deg, #dc2626, #b91c1c)";
               }}
             >
-              {loading ? (
-                <>
-                  <span style={{ opacity: 0.8 }}>⏳</span> Deleting…
-                </>
-              ) : (
-                "Yes, Delete"
-              )}
+              {loading ? "Deleting…" : "Yes, Delete"}
             </button>
           </div>
         </div>
@@ -158,7 +209,7 @@ export function DeleteConfirmModal({ zone, onConfirm, onCancel, loading }) {
   );
 }
 
-// ── Add / Edit Zone Modal ────────────────────────────────────
+// ── Zone Form Modal ───────────────────────────────────────────
 export function ZoneFormModal({ zone, onClose, onSuccess }) {
   const isEdit = !!zone;
 
@@ -245,11 +296,15 @@ export function ZoneFormModal({ zone, onClose, onSuccess }) {
 
   const styledInput = {
     ...inputStyle,
-    borderRadius: "10px",
-    border: "1px solid #e2e8f0",
-    fontSize: "13px",
-    padding: "10px 13px",
-    transition: "border-color 0.15s ease, box-shadow 0.15s ease",
+    borderRadius: "11px",
+    border: "1.5px solid #d0d9e8",
+    fontSize: "13.5px",
+    padding: "11px 14px",
+    color: "#0d1f3c",
+    fontWeight: "500",
+    background: "#ffffff",
+    fontFamily: "'DM Sans', sans-serif",
+    transition: "border-color 0.18s ease, box-shadow 0.18s ease",
     outline: "none",
   };
 
@@ -258,94 +313,100 @@ export function ZoneFormModal({ zone, onClose, onSuccess }) {
       style={{
         position: "fixed",
         inset: 0,
-        background: "rgba(10,22,40,0.65)",
-        backdropFilter: "blur(8px)",
+        background: "rgba(8,18,40,0.65)",
+        backdropFilter: "blur(10px)",
         zIndex: 1000,
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
         padding: "20px",
-        animation: "fadeIn 0.15s ease",
       }}
       onClick={(e) => e.target === e.currentTarget && onClose()}
     >
-      <style>{`
-        @keyframes fadeIn { from { opacity:0 } to { opacity:1 } }
-        @keyframes slideUp { from { opacity:0; transform:translateY(20px) } to { opacity:1; transform:translateY(0) } }
-        .zf-input:focus { border-color: #818cf8 !important; box-shadow: 0 0 0 3px rgba(129,140,248,0.12) !important; }
-        .zf-submit:hover:not(:disabled) { background: #1d4ed8 !important; transform: translateY(-1px); box-shadow: 0 6px 20px rgba(37,99,235,0.35) !important; }
-        .zf-submit { transition: all 0.18s ease !important; }
-        .zf-close:hover { background: #f1f5f9 !important; color: #0a1628 !important; }
-        .confirm-loc:hover { opacity: 0.9; }
-      `}</style>
+      <style>
+        {FONT_IMPORT +
+          `
+        @keyframes slideUp { from { opacity:0; transform:translateY(24px) scale(0.97) } to { opacity:1; transform:translateY(0) scale(1) } }
+        .zf-input:focus { border-color: #3b82f6 !important; box-shadow: 0 0 0 3.5px rgba(59,130,246,0.12) !important; }
+        .zf-input::placeholder { color: #a8b4c8; }
+        .modal-scrollbar::-webkit-scrollbar { width: 5px; }
+        .modal-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .modal-scrollbar::-webkit-scrollbar-thumb { background: #d0d9e8; border-radius: 6px; }
+      `}
+      </style>
 
       <div
+        className="modal-scrollbar"
         style={{
-          background: "#fff",
-          borderRadius: "20px",
+          background: "#ffffff",
+          borderRadius: "24px",
           width: "100%",
-          maxWidth: "520px",
+          maxWidth: "530px",
           maxHeight: "92vh",
           overflowY: "auto",
           boxShadow:
-            "0 32px 80px rgba(10,22,40,0.28), 0 0 0 1px rgba(0,0,0,0.04)",
-          animation: "slideUp 0.25s cubic-bezier(0.16,1,0.3,1)",
-          scrollbarWidth: "thin",
+            "0 40px 100px rgba(8,18,40,0.24), 0 0 0 1.5px rgba(59,130,246,0.08)",
+          animation: "slideUp 0.26s cubic-bezier(0.16,1,0.3,1)",
+          fontFamily: "'DM Sans', sans-serif",
         }}
       >
         {/* Header */}
         <div
           style={{
-            padding: "22px 26px 18px",
-            borderBottom: "1px solid #f1f5f9",
+            padding: "24px 28px 22px",
+            borderBottom: "1.5px solid #f0f4fa",
             position: "sticky",
             top: 0,
-            background: "#fff",
+            background: "linear-gradient(to bottom, #ffffff, #fafcff)",
             zIndex: 2,
             display: "flex",
             justifyContent: "space-between",
             alignItems: "flex-start",
-            borderRadius: "20px 20px 0 0",
+            borderRadius: "24px 24px 0 0",
           }}
         >
           <div
-            style={{ display: "flex", alignItems: "flex-start", gap: "12px" }}
+            style={{ display: "flex", alignItems: "flex-start", gap: "14px" }}
           >
             <div
               style={{
-                width: "40px",
-                height: "40px",
-                borderRadius: "12px",
+                width: "46px",
+                height: "46px",
+                borderRadius: "14px",
                 background: isEdit
-                  ? "#eff6ff"
-                  : "linear-gradient(135deg, #dbeafe, #ede9fe)",
+                  ? "linear-gradient(135deg, #eff6ff, #dbeafe)"
+                  : "linear-gradient(135deg, #eef2ff, #e0e7ff)",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                fontSize: "18px",
+                color: isEdit ? "#2563eb" : "#4f46e5",
                 flexShrink: 0,
                 marginTop: "1px",
+                border: isEdit ? "1.5px solid #bfdbfe" : "1.5px solid #c7d2fe",
+                boxShadow: isEdit
+                  ? "0 4px 14px rgba(37,99,235,0.14)"
+                  : "0 4px 14px rgba(79,70,229,0.14)",
               }}
             >
-              {isEdit ? "✏️" : "📍"}
+              <Icon d={isEdit ? IC.edit : IC.pin} size={19} strokeWidth={1.7} />
             </div>
             <div>
               <h2
                 style={{
                   margin: 0,
-                  fontSize: "17px",
+                  fontSize: "18px",
                   fontWeight: "700",
-                  color: "#0a1628",
-                  letterSpacing: "-0.3px",
+                  color: "#0d1f3c",
+                  letterSpacing: "-0.4px",
                 }}
               >
                 {isEdit ? "Edit Restricted Area" : "Mark Restricted Area"}
               </h2>
               <p
                 style={{
-                  margin: "3px 0 0",
-                  fontSize: "12px",
-                  color: "#8a96b0",
+                  margin: "5px 0 0",
+                  fontSize: "12.5px",
+                  color: "#7a8aaa",
                 }}
               >
                 {isEdit
@@ -354,34 +415,41 @@ export function ZoneFormModal({ zone, onClose, onSuccess }) {
               </p>
             </div>
           </div>
+
           <button
-            className="zf-close"
             onClick={onClose}
             style={{
-              background: "#f8fafc",
-              border: "1px solid #e2e8f0",
-              width: "32px",
-              height: "32px",
-              borderRadius: "9px",
-              fontSize: "13px",
+              background: "#f1f5f9",
+              border: "1.5px solid #e2e8f0",
+              width: "34px",
+              height: "34px",
+              borderRadius: "10px",
               cursor: "pointer",
-              color: "#8a96b0",
+              color: "#64748b",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              transition: "all 0.15s ease",
+              transition: "all 0.15s",
               flexShrink: 0,
             }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = "#e2e8f0";
+              e.currentTarget.style.color = "#0d1f3c";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = "#f1f5f9";
+              e.currentTarget.style.color = "#64748b";
+            }}
           >
-            ✕
+            <Icon d={IC.x} size={14} strokeWidth={2.2} />
           </button>
         </div>
 
         {/* Form body */}
-        <div style={{ padding: "20px 26px 26px" }}>
+        <div style={{ padding: "24px 28px 30px" }}>
           {/* Area Name */}
           <div style={sectionStyle}>
-            <label style={fieldLabel("Area Name")}>Area Name *</label>
+            <FieldLabel>Area Name *</FieldLabel>
             <input
               className="zf-input"
               style={styledInput}
@@ -393,13 +461,13 @@ export function ZoneFormModal({ zone, onClose, onSuccess }) {
 
           {/* Map */}
           <div style={sectionStyle}>
-            <label style={fieldLabel("Location")}>Location</label>
+            <FieldLabel>Location</FieldLabel>
             <div
               style={{
-                borderRadius: "12px",
+                borderRadius: "13px",
                 overflow: "hidden",
-                border: "1px solid #e2e8f0",
-                boxShadow: "0 2px 8px rgba(10,22,40,0.06)",
+                border: "1.5px solid #d0d9e8",
+                boxShadow: "0 2px 8px rgba(13,31,60,0.06)",
               }}
             >
               <LeafletLocationPicker
@@ -410,29 +478,18 @@ export function ZoneFormModal({ zone, onClose, onSuccess }) {
             </div>
           </div>
 
-          {/* Lat/Lng */}
-          <div style={{ display: "flex", gap: "10px", ...sectionStyle }}>
+          {/* Lat / Lng */}
+          <div style={{ display: "flex", gap: "12px", ...sectionStyle }}>
             {["lat", "lng"].map((field, i) => (
               <div key={field} style={{ flex: 1 }}>
-                <label
-                  style={{
-                    fontSize: "11px",
-                    fontWeight: "600",
-                    color: "#8a96b0",
-                    display: "block",
-                    marginBottom: "5px",
-                    textTransform: "uppercase",
-                    letterSpacing: "0.04em",
-                  }}
-                >
-                  {i === 0 ? "Latitude" : "Longitude"}
-                </label>
+                <FieldLabel>{i === 0 ? "Latitude" : "Longitude"}</FieldLabel>
                 <input
                   className="zf-input"
                   style={{
                     ...styledInput,
-                    fontFamily: "monospace",
-                    fontSize: "12px",
+                    fontFamily: "'DM Mono', monospace",
+                    fontSize: "12.5px",
+                    color: "#1e3a8a",
                   }}
                   value={form[field]}
                   onChange={(e) => {
@@ -444,59 +501,65 @@ export function ZoneFormModal({ zone, onClose, onSuccess }) {
             ))}
           </div>
 
-          {/* Confirm Location */}
+          {/* Confirm location */}
           <button
-            className="confirm-loc"
             onClick={() => setLocationConfirmed(true)}
             style={{
               width: "100%",
-              padding: "11px",
+              padding: "13px",
               background: locationConfirmed
                 ? "linear-gradient(135deg, #16a34a, #15803d)"
-                : "linear-gradient(135deg, #1e3a5f, #0a1628)",
+                : "linear-gradient(135deg, #1e3a8a, #1d4ed8)",
               color: "#fff",
               border: "none",
-              borderRadius: "10px",
-              fontSize: "13px",
-              fontWeight: "600",
+              borderRadius: "12px",
+              fontSize: "13.5px",
+              fontWeight: "700",
               cursor: "pointer",
-              marginBottom: locationConfirmed ? "8px" : "16px",
+              marginBottom: locationConfirmed ? "10px" : "18px",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              gap: "7px",
+              gap: "9px",
               boxShadow: locationConfirmed
-                ? "0 4px 14px rgba(22,163,74,0.3)"
-                : "0 4px 14px rgba(10,22,40,0.2)",
+                ? "0 6px 18px rgba(22,163,74,0.28)"
+                : "0 6px 18px rgba(37,99,235,0.28)",
               transition: "all 0.2s ease",
+              fontFamily: "'DM Sans', sans-serif",
+              letterSpacing: "0.01em",
             }}
           >
-            <span>📍</span>
+            <Icon
+              d={locationConfirmed ? IC.check : IC.pin}
+              size={15}
+              strokeWidth={2.2}
+            />
             {locationConfirmed ? "Location Confirmed ✓" : "Confirm Location"}
           </button>
 
           {locationConfirmed && (
             <p
               style={{
-                fontSize: "11.5px",
-                color: "#6b7a99",
-                marginBottom: "16px",
-                marginTop: "-2px",
+                fontSize: "12px",
+                color: "#5a6a86",
+                marginBottom: "18px",
+                marginTop: "-4px",
                 display: "flex",
                 alignItems: "center",
-                gap: "5px",
+                gap: "7px",
+                fontFamily: "'DM Mono', monospace",
               }}
             >
-              <span style={{ color: "#16a34a" }}>✓</span>
+              <span style={{ color: "#16a34a", display: "flex" }}>
+                <Icon d={IC.check} size={12} strokeWidth={2.8} />
+              </span>
               {form.lat}, {form.lng}
             </p>
           )}
 
           {/* Restricted Time */}
           <div style={sectionStyle}>
-            <label style={fieldLabel("Restricted Time")}>
-              Restricted Time Period *
-            </label>
+            <FieldLabel>Restricted Time Period *</FieldLabel>
             <input
               className="zf-input"
               style={styledInput}
@@ -507,40 +570,17 @@ export function ZoneFormModal({ zone, onClose, onSuccess }) {
           </div>
 
           {/* Dates */}
-          <div style={{ display: "flex", gap: "10px", ...sectionStyle }}>
+          <div style={{ display: "flex", gap: "12px", ...sectionStyle }}>
             {[
-              {
-                field: "startDate",
-                label: "Start Date",
-                required: true,
-                type: "date",
-              },
-              {
-                field: "endDate",
-                label: "End Date (Optional)",
-                required: false,
-                type: "date",
-              },
-            ].map(({ field, label, required, type }) => (
+              { field: "startDate", label: "Start Date *" },
+              { field: "endDate", label: "End Date (Optional)" },
+            ].map(({ field, label }) => (
               <div key={field} style={{ flex: 1 }}>
-                <label
-                  style={{
-                    fontSize: "11px",
-                    fontWeight: "600",
-                    color: "#8a96b0",
-                    display: "block",
-                    marginBottom: "5px",
-                    textTransform: "uppercase",
-                    letterSpacing: "0.04em",
-                  }}
-                >
-                  {label}
-                  {required ? " *" : ""}
-                </label>
+                <FieldLabel>{label}</FieldLabel>
                 <input
-                  type={type}
+                  type="date"
                   className="zf-input"
-                  style={styledInput}
+                  style={{ ...styledInput, colorScheme: "light" }}
                   value={form[field]}
                   onChange={handleChange(field)}
                 />
@@ -548,39 +588,41 @@ export function ZoneFormModal({ zone, onClose, onSuccess }) {
             ))}
           </div>
 
-          {/* Photo */}
-          <div style={{ marginBottom: "20px" }}>
-            <label style={fieldLabel("Area Photo")}>
+          {/* Photo upload */}
+          <div style={{ marginBottom: "22px" }}>
+            <FieldLabel>
               Area Photo {isEdit ? "(leave blank to keep existing)" : "*"}
-            </label>
+            </FieldLabel>
             <div
               style={{
-                border: "1.5px dashed #c7d2e8",
-                borderRadius: "10px",
-                padding: "14px 16px",
-                background: "#f8fafc",
+                border: "2px dashed #c7d4e8",
+                borderRadius: "13px",
+                padding: "16px 18px",
+                background: "linear-gradient(135deg, #f8faff, #f5f8fe)",
                 display: "flex",
                 alignItems: "center",
-                gap: "10px",
-                cursor: "pointer",
+                gap: "14px",
+                transition: "border-color 0.15s",
               }}
             >
-              <span style={{ fontSize: "20px" }}>🖼</span>
+              <span style={{ color: "#93b4d4" }}>
+                <Icon d={IC.img} size={22} strokeWidth={1.3} />
+              </span>
               <div style={{ flex: 1, minWidth: 0 }}>
                 <p
                   style={{
                     margin: 0,
-                    fontSize: "12px",
-                    fontWeight: "500",
-                    color: "#3a4565",
+                    fontSize: "13px",
+                    fontWeight: "600",
+                    color: "#334155",
                   }}
                 >
                   {form.photo ? form.photo.name : "Choose image file"}
                 </p>
                 <p
                   style={{
-                    margin: "2px 0 0",
-                    fontSize: "11px",
+                    margin: "3px 0 0",
+                    fontSize: "11.5px",
                     color: "#94a3b8",
                   }}
                 >
@@ -589,15 +631,17 @@ export function ZoneFormModal({ zone, onClose, onSuccess }) {
               </div>
               <label
                 style={{
-                  padding: "6px 12px",
-                  background: "#eff6ff",
-                  border: "1px solid #bfdbfe",
-                  borderRadius: "7px",
-                  fontSize: "12px",
-                  fontWeight: "500",
+                  padding: "8px 16px",
+                  background: "linear-gradient(135deg, #eff6ff, #dbeafe)",
+                  border: "1.5px solid #93c5fd",
+                  borderRadius: "9px",
+                  fontSize: "12.5px",
+                  fontWeight: "700",
                   color: "#1d4ed8",
                   cursor: "pointer",
                   whiteSpace: "nowrap",
+                  fontFamily: "'DM Sans', sans-serif",
+                  transition: "all 0.15s",
                 }}
               >
                 Browse
@@ -617,27 +661,29 @@ export function ZoneFormModal({ zone, onClose, onSuccess }) {
           {error && (
             <div
               style={{
-                background: "#fff5f5",
-                border: "1px solid #fecaca",
-                borderRadius: "10px",
-                padding: "10px 14px",
+                background: "linear-gradient(135deg, #fff5f5, #fff0f0)",
+                border: "1.5px solid #fecaca",
+                borderRadius: "11px",
+                padding: "12px 16px",
                 display: "flex",
-                gap: "8px",
+                gap: "11px",
                 alignItems: "flex-start",
-                marginBottom: "14px",
+                marginBottom: "18px",
+                boxShadow: "0 2px 8px rgba(220,38,38,0.08)",
               }}
             >
               <span
-                style={{ fontSize: "14px", flexShrink: 0, marginTop: "1px" }}
+                style={{ color: "#dc2626", marginTop: "1px", flexShrink: 0 }}
               >
-                ⚠️
+                <Icon d={IC.warning} size={15} strokeWidth={2} />
               </span>
               <p
                 style={{
                   fontSize: "13px",
-                  color: "#e53e3e",
+                  color: "#b91c1c",
                   margin: 0,
-                  lineHeight: 1.5,
+                  lineHeight: 1.6,
+                  fontWeight: "500",
                 }}
               >
                 {error}
@@ -647,23 +693,37 @@ export function ZoneFormModal({ zone, onClose, onSuccess }) {
 
           {/* Submit */}
           <button
-            className="zf-submit"
             onClick={handleSubmit}
             disabled={loading}
             style={{
               width: "100%",
-              padding: "13px",
+              padding: "14px",
               background: loading
                 ? "#93c5fd"
-                : "linear-gradient(135deg, #2563eb, #1d4ed8)",
+                : "linear-gradient(135deg, #1d4ed8, #2563eb)",
               color: "#fff",
               border: "none",
-              borderRadius: "11px",
-              fontSize: "14px",
-              fontWeight: "600",
+              borderRadius: "13px",
+              fontSize: "14.5px",
+              fontWeight: "700",
               cursor: loading ? "not-allowed" : "pointer",
-              boxShadow: loading ? "none" : "0 4px 16px rgba(37,99,235,0.3)",
-              letterSpacing: "0.01em",
+              boxShadow: loading ? "none" : "0 8px 22px rgba(37,99,235,0.32)",
+              letterSpacing: "0.02em",
+              transition: "all 0.2s ease",
+              fontFamily: "'DM Sans', sans-serif",
+            }}
+            onMouseEnter={(e) => {
+              if (!loading) {
+                e.currentTarget.style.transform = "translateY(-2px)";
+                e.currentTarget.style.boxShadow =
+                  "0 14px 32px rgba(37,99,235,0.38)";
+              }
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = "translateY(0)";
+              e.currentTarget.style.boxShadow = loading
+                ? "none"
+                : "0 8px 22px rgba(37,99,235,0.32)";
             }}
           >
             {loading
