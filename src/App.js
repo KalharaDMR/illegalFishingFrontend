@@ -11,6 +11,7 @@ import AuthorizedProfile from "./pages/AuthorizedUserProfile";
 import IllegalReport from "./pages/IllegalReport";
 import MyReports from "./pages/MyReports"; //  ADDED
 import ProtectedRoute from "./components/ProtectedRoute";
+import SubmitInvestigation from "./pages/authorized/SubmitInvestigation";
 
 function App() {
   return (
@@ -110,6 +111,15 @@ function App() {
           element={
             <ProtectedRoute role="AUTHORIZED_PERSON">
               <AuthorizedProfile />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/authorized/submit-investigation/:investigationId"
+          element={
+            <ProtectedRoute role="AUTHORIZED_PERSON">
+              <SubmitInvestigation />
             </ProtectedRoute>
           }
         />

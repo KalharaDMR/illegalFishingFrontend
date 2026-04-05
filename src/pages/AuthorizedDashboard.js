@@ -1,7 +1,7 @@
+// src/pages/authorized/AuthorizedDashboard.jsx
 import { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 import Layout from "../components/Layout";
-
 import {
   inputStyle,
   API_BASE,
@@ -15,6 +15,8 @@ import {
   ZoneFormModal,
 } from "../components/authorizedDashboard/DashboardModals";
 import AIAdvisoryPanel from "../components/authorizedDashboard/AIAdvisoryPanel";
+import AssignedReportsTab from "../components/authorizedDashboard/AssignedReportsTab";
+import MyInvestigationsTab from "../components/authorizedDashboard/MyInvestigationsTab";
 
 export default function AuthorizedDashboard() {
   const location = useLocation();
@@ -29,13 +31,11 @@ export default function AuthorizedDashboard() {
     verified: 0,
   });
   const [loadingZones, setLoadingZones] = useState(false);
-
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingZone, setEditingZone] = useState(null);
   const [deletingZone, setDeletingZone] = useState(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [showAIAdvisory, setShowAIAdvisory] = useState(false);
-
   const [searchQuery, setSearchQuery] = useState("");
   const [toggleLoadingId, setToggleLoadingId] = useState(null);
 
@@ -56,7 +56,7 @@ export default function AuthorizedDashboard() {
         }));
       }
     } catch (err) {
-      console.error("Failed to fetch zones:", err);
+      console.error(err);
     } finally {
       setLoadingZones(false);
     }
@@ -91,7 +91,7 @@ export default function AuthorizedDashboard() {
         }));
       }
     } catch (err) {
-      console.warn("Reports endpoint not available:", err);
+      console.warn(err);
     }
   };
 
@@ -132,11 +132,10 @@ export default function AuthorizedDashboard() {
 
   const handleToggleZone = async (zone) => {
     setToggleLoadingId(zone._id);
-
     try {
       const token = localStorage.getItem("token");
-
       const formData = new FormData();
+
       formData.append("name", zone.name || "");
       formData.append(
         "location",
@@ -160,37 +159,26 @@ export default function AuthorizedDashboard() {
       }
 
       formData.append("restrictedTime", zone.restrictedTime || "All Day");
-      formData.append("isActive", zone.isActive ? "false" : "true");
+      formData.append("isActive", zone.isActive === false ? "true" : "false");
 
       const res = await fetch(`${API_BASE}/api/zones/${zone._id}`, {
         method: "PUT",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { Authorization: `Bearer ${token}` },
         body: formData,
       });
 
-      const ct = res.headers.get("content-type") || "";
-      if (!ct.includes("application/json")) {
-        throw new Error("Server unreachable");
-      }
-
-      const data = await res.json();
-      if (!res.ok) {
-        throw new Error(data.message || "Failed to update zone status");
-      }
+      if (!res.ok) throw new Error("Failed to update status");
 
       fetchZones();
     } catch (err) {
-      console.error(err);
-      alert(err.message || "Failed to update zone");
+      alert(err.message || "Failed to update zone status");
     } finally {
       setToggleLoadingId(null);
     }
   };
 
   const filteredZones = zones.filter((z) => {
-    const q = searchQuery.toLowerCase();
+    const q = searchQuery?.toLowerCase() || "";
     return (
       z.name?.toLowerCase().includes(q) ||
       z.restrictedTime?.toLowerCase().includes(q) ||
@@ -245,6 +233,7 @@ export default function AuthorizedDashboard() {
           from { opacity: 0; transform: translateY(12px); }
           to { opacity: 1; transform: translateY(0); }
         }
+
         @keyframes shimmer {
           0% { background-position: -600px 0; }
           100% { background-position: 600px 0; }
@@ -381,6 +370,8 @@ export default function AuthorizedDashboard() {
               {[
                 { key: "reports", label: "⚠️ Fishing Reports" },
                 { key: "areas", label: "📍 Restricted Areas" },
+                { key: "assigned", label: "📋 Assigned" },
+                { key: "myInvestigations", label: "🧭 My Investigations" },
               ].map(({ key, label }) => (
                 <button
                   key={key}
@@ -463,6 +454,7 @@ export default function AuthorizedDashboard() {
                     }}
                   />
                 </div>
+
                 <button
                   onClick={() => {
                     setEditingZone(null);
@@ -506,26 +498,19 @@ export default function AuthorizedDashboard() {
           style={{
             background: "#fff",
             border: "1px solid #dde3ee",
-            borderRadius: "16px",
-            maxWidth: "1100px",
-            overflow: "hidden",
-            animation: "fadeInUp 0.25s ease both",
-            boxShadow: "0 2px 12px rgba(10,22,40,0.05)",
+            borderRadius: "12px",
+            padding: "60px 20px",
+            textAlign: "center",
+            maxWidth: "860px",
           }}
         >
           {reports.length === 0 ? (
-            <div style={{ padding: "70px 20px", textAlign: "center" }}>
+            <>
               <div
                 style={{
-                  width: "60px",
-                  height: "60px",
-                  borderRadius: "18px",
-                  background: "linear-gradient(135deg, #f1f5f9, #e8ecf4)",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  fontSize: "26px",
-                  margin: "0 auto 16px",
+                  fontSize: "38px",
+                  marginBottom: "12px",
+                  color: "#c5cfe0",
                 }}
               >
                 ⚠
@@ -533,7 +518,7 @@ export default function AuthorizedDashboard() {
               <h3
                 style={{
                   margin: "0 0 6px",
-                  fontSize: "15px",
+                  fontSize: "16px",
                   fontWeight: "600",
                   color: "#3a4565",
                 }}
@@ -543,179 +528,181 @@ export default function AuthorizedDashboard() {
               <p style={{ margin: 0, fontSize: "13px", color: "#9aa4be" }}>
                 Reports from public users will appear here
               </p>
-            </div>
+            </>
           ) : (
-            <>
-              <div
-                style={{
-                  padding: "12px 20px",
-                  borderBottom: "1px solid #f1f5f9",
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                }}
-              >
-                <span
-                  style={{
-                    fontSize: "12px",
-                    fontWeight: "600",
-                    color: "#8a96b0",
-                    textTransform: "uppercase",
-                    letterSpacing: "0.05em",
-                  }}
-                >
-                  {reports.length} Report{reports.length !== 1 ? "s" : ""}
-                </span>
-              </div>
-
-              <div style={{ display: "flex", flexDirection: "column" }}>
-                {reports.map((report) => {
-                  const badge = statusColor(report.status);
-                  return (
-                    <div
-                      key={report._id}
-                      className="report-row"
-                      style={{
-                        padding: "16px 20px",
-                        borderBottom: "1px solid #f8fafc",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "space-between",
-                        gap: "16px",
-                      }}
-                    >
-                      <div style={{ flex: 1, minWidth: 0 }}>
-                        <div
-                          style={{
-                            display: "flex",
-                            alignItems: "center",
-                            gap: "10px",
-                            marginBottom: "6px",
-                            flexWrap: "wrap",
-                          }}
-                        >
-                          <h3
-                            style={{
-                              margin: 0,
-                              fontSize: "14px",
-                              fontWeight: "600",
-                              color: "#0f172a",
-                            }}
-                          >
-                            {report.title || "Fishing Incident Report"}
-                          </h3>
-                          <span
-                            style={{
-                              padding: "4px 9px",
-                              borderRadius: "999px",
-                              background: badge.bg,
-                              color: badge.color,
-                              fontSize: "11px",
-                              fontWeight: "600",
-                            }}
-                          >
-                            {report.status}
-                          </span>
-                        </div>
-
-                        <p
-                          style={{
-                            margin: "0 0 6px",
-                            fontSize: "13px",
-                            color: "#64748b",
-                            lineHeight: 1.5,
-                          }}
-                        >
-                          {report.description || "No description available"}
-                        </p>
-
-                        <div
-                          style={{
-                            display: "flex",
-                            gap: "14px",
-                            flexWrap: "wrap",
-                            fontSize: "12px",
-                            color: "#94a3b8",
-                          }}
-                        >
-                          <span>
-                            📍 {report.location || "Unknown location"}
-                          </span>
-                          <span>
-                            🕒{" "}
-                            {report.createdAt
-                              ? new Date(report.createdAt).toLocaleString()
-                              : "N/A"}
-                          </span>
-                        </div>
+            <div
+              style={{
+                textAlign: "left",
+                display: "flex",
+                flexDirection: "column",
+                gap: "12px",
+              }}
+            >
+              {reports.map((r) => {
+                const badge = statusColor(r.status);
+                return (
+                  <div
+                    key={r._id}
+                    className="report-row"
+                    style={{
+                      padding: "14px 18px",
+                      border: "1px solid #e4eaf3",
+                      borderRadius: "10px",
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                    }}
+                  >
+                    <div>
+                      <div
+                        style={{
+                          fontSize: "14px",
+                          fontWeight: "600",
+                          color: "#0a1628",
+                        }}
+                      >
+                        {r.title || r.description || "Report"}
+                      </div>
+                      <div
+                        style={{
+                          fontSize: "12px",
+                          color: "#9aa4be",
+                          marginTop: "3px",
+                        }}
+                      >
+                        {r.location?.address || ""} ·{" "}
+                        {new Date(r.createdAt).toLocaleDateString()}
                       </div>
                     </div>
-                  );
-                })}
-              </div>
-            </>
+
+                    <span
+                      style={{
+                        fontSize: "11px",
+                        fontWeight: "600",
+                        padding: "3px 10px",
+                        borderRadius: "20px",
+                        background: badge.bg,
+                        color: badge.color,
+                      }}
+                    >
+                      {r.status}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
           )}
         </div>
       )}
 
       {activeTab === "areas" && (
         <>
-          <div
-            style={{
-              width: "100%",
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))",
-              gap: "18px",
-              alignItems: "stretch",
-              animation: "fadeInUp 0.35s ease both",
-            }}
-          >
-            {loadingZones ? (
-              [...Array(4)].map((_, i) => (
+          <div>
+            <div
+              style={{
+                width: "100%",
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))",
+                gap: "18px",
+                alignItems: "stretch",
+                animation: "fadeInUp 0.35s ease both",
+              }}
+            >
+              {loadingZones ? (
+                [...Array(4)].map((_, i) => (
+                  <div
+                    key={i}
+                    style={{
+                      height: "310px",
+                      borderRadius: "16px",
+                      background:
+                        "linear-gradient(90deg, #f8fafc 25%, #eef2f7 50%, #f8fafc 75%)",
+                      backgroundSize: "600px 100%",
+                      animation: "shimmer 1.4s infinite linear",
+                      border: "1px solid #e5eaf2",
+                    }}
+                  />
+                ))
+              ) : filteredZones.length === 0 ? (
                 <div
-                  key={i}
                   style={{
-                    height: "310px",
-                    borderRadius: "16px",
-                    background:
-                      "linear-gradient(90deg, #f8fafc 25%, #eef2f7 50%, #f8fafc 75%)",
-                    backgroundSize: "600px 100%",
-                    animation: "shimmer 1.4s infinite linear",
-                    border: "1px solid #e5eaf2",
+                    gridColumn: "1 / -1",
+                    background: "#fff",
+                    border: "1px solid #dde3ee",
+                    borderRadius: "20px",
+                    padding: "70px 20px",
+                    textAlign: "center",
+                    boxShadow: "0 10px 26px rgba(15,23,42,0.05)",
                   }}
-                />
-              ))
-            ) : filteredZones.length === 0 ? (
-              <div
-                style={{
-                  gridColumn: "1 / -1",
-                  background: "#fff",
-                  border: "1px solid #dde3ee",
-                  borderRadius: "20px",
-                  padding: "70px 20px",
-                  textAlign: "center",
-                  boxShadow: "0 10px 26px rgba(15,23,42,0.05)",
-                }}
-              >
-                {/* keep existing empty state */}
-              </div>
-            ) : (
-              filteredZones.map((zone) => (
-                <ZoneCard
-                  key={zone._id}
-                  zone={zone}
-                  onEdit={() => {
-                    setEditingZone(zone);
-                    setShowAddModal(true);
-                  }}
-                  onDelete={() => setDeletingZone(zone)}
-                  onToggleStatus={() => handleToggleZone(zone)}
-                  toggleLoading={toggleLoadingId === zone._id}
-                />
-              ))
-            )}
+                >
+                  <div
+                    style={{
+                      fontSize: "38px",
+                      marginBottom: "12px",
+                      color: "#c5cfe0",
+                    }}
+                  >
+                    🗺
+                  </div>
+                  <h3
+                    style={{
+                      margin: "0 0 6px",
+                      fontSize: "16px",
+                      fontWeight: "600",
+                      color: "#3a4565",
+                    }}
+                  >
+                    {searchQuery
+                      ? "No zones match your search"
+                      : "No restricted areas yet"}
+                  </h3>
+                  <p style={{ margin: 0, fontSize: "13px", color: "#9aa4be" }}>
+                    {searchQuery
+                      ? "Try a different search term."
+                      : 'Click "Add Restricted Area" to get started.'}
+                  </p>
+                </div>
+              ) : (
+                filteredZones.map((zone) => (
+                  <ZoneCard
+                    key={zone._id}
+                    zone={zone}
+                    onEdit={() => {
+                      setEditingZone(zone);
+                      setShowAddModal(true);
+                    }}
+                    onDelete={() => setDeletingZone(zone)}
+                    onToggleStatus={() => handleToggleZone(zone)}
+                    toggleLoading={toggleLoadingId === zone._id}
+                  />
+                ))
+              )}
+            </div>
           </div>
         </>
+      )}
+
+      {activeTab === "assigned" && (
+        <AssignedReportsTab
+          onStatsUpdate={(s) =>
+            setStats((prev) => ({
+              ...prev,
+              pendingReports: s.assignedPending ?? prev.pendingReports,
+            }))
+          }
+        />
+      )}
+
+      {activeTab === "myInvestigations" && (
+        <MyInvestigationsTab
+          onStatsUpdate={(s) =>
+            setStats((prev) => ({
+              ...prev,
+              yourInvestigations: s.myInProgress ?? prev.yourInvestigations,
+              verified: s.myCompleted ?? prev.verified,
+            }))
+          }
+        />
       )}
 
       {showAddModal && (
