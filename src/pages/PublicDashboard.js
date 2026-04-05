@@ -4,10 +4,35 @@ import Layout from "../components/Layout";
 import api from "../api/axios";
 
 const quickActions = [
-  { label: "Report Incident", desc: "Submit a new illegal fishing report", path: "/report", accent: "#22d3b0", icon: "◎" },
-  { label: "My Reports", desc: "Track your submitted reports", path: "/my-reports", accent: "#0ea5e9", icon: "◉" },
-  { label: "Profile", desc: "Manage your account settings", path: "/public/profile", accent: "#8b5cf6", icon: "◈" },
-  { label: "Notifications", desc: "View updates on your reports", path: "/notifications", accent: "#f59e0b", icon: "◆", badge: true },
+  {
+    label: "Report Incident",
+    desc: "Submit a new illegal fishing report",
+    path: "/public/report",
+    accent: "#22d3b0",
+    icon: "◎",
+  },
+  {
+    label: "My Reports",
+    desc: "Track your submitted reports",
+    path: "/public/my-reports",
+    accent: "#0ea5e9",
+    icon: "◉",
+  },
+  {
+    label: "Profile",
+    desc: "Manage your account settings",
+    path: "/public/profile",
+    accent: "#8b5cf6",
+    icon: "◈",
+  },
+  {
+    label: "Notifications",
+    desc: "View updates on your reports",
+    path: "/notifications",
+    accent: "#f59e0b",
+    icon: "◆",
+    badge: true,
+  },
 ];
 
 const STATUS_COLOR = {
@@ -30,16 +55,15 @@ export default function PublicDashboard() {
   const [activeTab, setActiveTab] = useState("zones");
   const [loadingZones, setLoadingZones] = useState(true);
   const [loadingSpecies, setLoadingSpecies] = useState(true);
-  const [userName, setUserName] = useState(""); // ← added
+  const [userName, setUserName] = useState("");
 
   useEffect(() => {
     fetchZones();
     fetchSpecies();
     fetchReportStats();
-    fetchUserName(); // ← added
+    fetchUserName();
   }, []);
 
-  // ← added
   const fetchUserName = async () => {
     try {
       const res = await api.get("/profile/public/me");
@@ -106,7 +130,7 @@ export default function PublicDashboard() {
           <div style={{ position: "absolute", inset: 0, opacity: 0.05, backgroundImage: "radial-gradient(circle, #22d3b0 1px, transparent 1px)", backgroundSize: "32px 32px" }} />
           <div style={{ position: "relative" }}>
             <div style={{ fontSize: "11px", color: "#22d3b0", letterSpacing: "0.1em", textTransform: "uppercase", fontWeight: "500", marginBottom: "10px" }}>
-              {userName || "Public Portal"} {/* ← changed */}
+              {userName || "Public Portal"}
             </div>
             <h1 style={{ fontSize: "26px", fontWeight: "600", color: "#f0f6ff", margin: "0 0 10px", letterSpacing: "-0.01em" }}>
               Welcome back
@@ -147,24 +171,38 @@ export default function PublicDashboard() {
           <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "14px" }}>
             {quickActions.map((action) => (
               <a key={action.path} href={action.path} style={{ textDecoration: "none" }}>
-                <div
-                  style={{
-                    background: "#fff", borderRadius: "12px", padding: "22px",
-                    border: "1px solid #e4eaf3", cursor: "pointer",
-                    transition: "all 0.15s ease", display: "block", position: "relative",
-                  }}
-                  onMouseEnter={(e) => { e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.boxShadow = "0 8px 24px rgba(0,0,0,0.08)"; e.currentTarget.style.borderColor = action.accent; }}
-                  onMouseLeave={(e) => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "none"; e.currentTarget.style.borderColor = "#e4eaf3"; }}
-                >
-                  <div style={{ fontSize: "22px", marginBottom: "12px", color: action.accent }}>{action.icon}</div>
-                  <div style={{ fontSize: "15px", fontWeight: "600", color: "#0a1628", marginBottom: "6px" }}>{action.label}</div>
-                  <div style={{ fontSize: "13px", color: "#8a96b0", lineHeight: "1.5" }}>{action.desc}</div>
+                <div style={{
+                  background: "#fff",
+                  borderRadius: "12px",
+                  padding: "22px",
+                  border: "1px solid #e4eaf3",
+                  cursor: "pointer",
+                  transition: "all 0.15s ease",
+                  display: "block",
+                  position: "relative",
+                }}>
+                  <div style={{ fontSize: "22px", marginBottom: "12px", color: action.accent }}>
+                    {action.icon}
+                  </div>
+                  <div style={{ fontSize: "15px", fontWeight: "600", color: "#0a1628", marginBottom: "6px" }}>
+                    {action.label}
+                  </div>
+                  <div style={{ fontSize: "13px", color: "#8a96b0", lineHeight: "1.5" }}>
+                    {action.desc}
+                  </div>
                   {action.badge && notifCount > 0 && (
                     <span style={{
-                      position: "absolute", top: "12px", right: "12px",
-                      background: "#f59e0b", color: "#fff",
-                      fontSize: "10px", fontWeight: "700",
-                      borderRadius: "99px", padding: "2px 8px", minWidth: "18px", textAlign: "center",
+                      position: "absolute",
+                      top: "12px",
+                      right: "12px",
+                      background: "#f59e0b",
+                      color: "#fff",
+                      fontSize: "10px",
+                      fontWeight: "700",
+                      borderRadius: "99px",
+                      padding: "2px 8px",
+                      minWidth: "18px",
+                      textAlign: "center",
                     }}>
                       {notifCount}
                     </span>
@@ -186,20 +224,21 @@ export default function PublicDashboard() {
               { key: "zones", label: "🚫 Restricted Zones", count: zones.length },
               { key: "species", label: "🐟 Endangered Species", count: species.length },
             ].map((tab) => (
-              <button
-                key={tab.key}
-                onClick={() => setActiveTab(tab.key)}
-                style={{
-                  background: "none", border: "none",
-                  borderBottom: activeTab === tab.key ? "2px solid #22d3b0" : "2px solid transparent",
-                  marginBottom: "-2px",
-                  padding: "10px 16px",
-                  fontSize: "13px", fontWeight: "600",
-                  color: activeTab === tab.key ? "#0a1628" : "#8a96b0",
-                  cursor: "pointer", display: "flex", alignItems: "center", gap: "8px",
-                  transition: "color 0.15s",
-                }}
-              >
+              <button key={tab.key} onClick={() => setActiveTab(tab.key)} style={{
+                background: "none",
+                border: "none",
+                borderBottom: activeTab === tab.key ? "2px solid #22d3b0" : "2px solid transparent",
+                marginBottom: "-2px",
+                padding: "10px 16px",
+                fontSize: "13px",
+                fontWeight: "600",
+                color: activeTab === tab.key ? "#0a1628" : "#8a96b0",
+                cursor: "pointer",
+                display: "flex",
+                alignItems: "center",
+                gap: "8px",
+                transition: "color 0.15s",
+              }}>
                 {tab.label}
                 <span style={{
                   background: "#f0f4f8", borderRadius: "99px",
@@ -211,6 +250,7 @@ export default function PublicDashboard() {
             ))}
           </div>
 
+          {/* Zones */}
           {activeTab === "zones" && (
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: "14px" }}>
               {loadingZones ? (
@@ -218,21 +258,11 @@ export default function PublicDashboard() {
               ) : zones.length === 0 ? (
                 <div style={{ gridColumn: "1/-1", textAlign: "center", color: "#8a96b0", padding: "40px" }}>No active restricted zones found.</div>
               ) : zones.map((z) => (
-                <div key={z._id} style={{
-                  background: "#fff", borderRadius: "12px", padding: "18px 20px",
-                  border: "1px solid #e4eaf3", boxShadow: "0 1px 6px rgba(0,0,0,0.04)",
-                }}>
+                <div key={z._id} style={{ background: "#fff", borderRadius: "12px", padding: "18px 20px", border: "1px solid #e4eaf3", boxShadow: "0 1px 6px rgba(0,0,0,0.04)" }}>
                   <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "12px" }}>
-                    <span style={{
-                      width: "8px", height: "8px", borderRadius: "50%", background: "#22d3b0",
-                      flexShrink: 0, boxShadow: "0 0 0 3px rgba(34,211,176,0.2)",
-                    }} />
+                    <span style={{ width: "8px", height: "8px", borderRadius: "50%", background: "#22d3b0", flexShrink: 0, boxShadow: "0 0 0 3px rgba(34,211,176,0.2)" }} />
                     <span style={{ fontWeight: "600", color: "#0a1628", fontSize: "14px", flex: 1 }}>{z.name}</span>
-                    <span style={{
-                      fontSize: "10px", fontWeight: "700", letterSpacing: "0.08em",
-                      background: "rgba(34,211,176,0.1)", color: "#22d3b0",
-                      borderRadius: "99px", padding: "2px 10px",
-                    }}>
+                    <span style={{ fontSize: "10px", fontWeight: "700", letterSpacing: "0.08em", background: "rgba(34,211,176,0.1)", color: "#22d3b0", borderRadius: "99px", padding: "2px 10px" }}>
                       {z.isActive ? "ACTIVE" : "INACTIVE"}
                     </span>
                   </div>
@@ -255,6 +285,7 @@ export default function PublicDashboard() {
             </div>
           )}
 
+          {/* Species */}
           {activeTab === "species" && (
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: "14px" }}>
               {loadingSpecies ? (
@@ -265,18 +296,8 @@ export default function PublicDashboard() {
                 const fish = sp.fishes?.[0] || {};
                 const status = fish.conservationStatus || "Not Evaluated";
                 return (
-                  <div key={sp._id} style={{
-                    background: "#fff", borderRadius: "12px",
-                    border: "1px solid #e4eaf3", overflow: "hidden",
-                    boxShadow: "0 1px 6px rgba(0,0,0,0.04)",
-                  }}>
-                    {sp.evidence?.url && (
-                      <img
-                        src={sp.evidence.url}
-                        alt={fish.localName}
-                        style={{ width: "100%", height: "140px", objectFit: "cover" }}
-                      />
-                    )}
+                  <div key={sp._id} style={{ background: "#fff", borderRadius: "12px", border: "1px solid #e4eaf3", overflow: "hidden", boxShadow: "0 1px 6px rgba(0,0,0,0.04)" }}>
+                    {sp.evidence?.url && <img src={sp.evidence.url} alt={fish.localName} style={{ width: "100%", height: "140px", objectFit: "cover" }} />}
                     <div style={{ padding: "16px 18px" }}>
                       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "8px" }}>
                         <div>
@@ -284,35 +305,28 @@ export default function PublicDashboard() {
                           <div style={{ fontSize: "11px", color: "#8a96b0", fontStyle: "italic", marginTop: "2px" }}>{fish.scientificName}</div>
                         </div>
                         <span style={{
-                          fontSize: "10px", fontWeight: "700", borderRadius: "99px",
-                          padding: "3px 10px", letterSpacing: "0.04em", whiteSpace: "nowrap", flexShrink: 0,
+                          fontSize: "10px",
+                          fontWeight: "700",
+                          borderRadius: "99px",
+                          padding: "3px 10px",
+                          letterSpacing: "0.04em",
+                          whiteSpace: "nowrap",
+                          flexShrink: 0,
                           color: STATUS_COLOR[status] || "#8a96b0",
                           background: (STATUS_COLOR[status] || "#8a96b0") + "18",
                         }}>
                           {status}
                         </span>
                       </div>
-                      {sp.location?.city && (
-                        <div style={{ fontSize: "11px", color: "#8a96b0", marginBottom: "8px" }}>
-                          📍 {sp.location.city}{sp.location.country ? `, ${sp.location.country}` : ""}
-                        </div>
-                      )}
+                      {sp.location?.city && <div style={{ fontSize: "11px", color: "#8a96b0", marginBottom: "8px" }}>📍 {sp.location.city}{sp.location.country ? `, ${sp.location.country}` : ""}</div>}
                       {sp.threats?.length > 0 && (
                         <div style={{ display: "flex", flexWrap: "wrap", gap: "4px" }}>
                           {sp.threats.slice(0, 3).map((t, i) => (
-                            <span key={i} style={{
-                              fontSize: "10px", fontWeight: "600",
-                              background: "rgba(255,107,0,0.08)", color: "#ff6b00",
-                              borderRadius: "99px", padding: "2px 8px",
-                            }}>{t}</span>
+                            <span key={i} style={{ fontSize: "10px", fontWeight: "600", background: "rgba(255,107,0,0.08)", color: "#ff6b00", borderRadius: "99px", padding: "2px 8px" }}>{t}</span>
                           ))}
                         </div>
                       )}
-                      {sp.fishes?.length > 1 && (
-                        <div style={{ fontSize: "11px", color: "#8a96b0", marginTop: "8px" }}>
-                          +{sp.fishes.length - 1} more species in this entry
-                        </div>
-                      )}
+                      {sp.fishes?.length > 1 && <div style={{ fontSize: "11px", color: "#8a96b0", marginTop: "8px" }}>+{sp.fishes.length - 1} more species in this entry</div>}
                     </div>
                   </div>
                 );
@@ -320,7 +334,6 @@ export default function PublicDashboard() {
             </div>
           )}
         </div>
-
       </div>
     </Layout>
   );
